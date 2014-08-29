@@ -1,3 +1,4 @@
+from json import loads
 from flask import Flask
 from flask.ext import restful
 from cache import request_cache
@@ -8,7 +9,7 @@ api = restful.Api(app)
 
 class Departures(restful.Resource):
 
-    @request_cache(ttl_seconds=300)
+    @request_cache(ttl_seconds=90)
     def get(self, agency, stop_id):
         """
         Retrieve departure data from proper agency (or from redis cache).

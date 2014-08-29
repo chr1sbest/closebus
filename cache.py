@@ -16,13 +16,13 @@ def request_cache(ttl_seconds=300):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             cached = redis_cache.get(kwargs)
-            remaining_time = redis_cache.ttl(kwargs)
+            #remaining_time = redis_cache.ttl(kwargs)
             if cached:
-                return (cached, remaining_time)
+                return loads(cached)
             else:
                 result = func(self, *args, **kwargs)
                 redis_cache.setex(kwargs, ttl_seconds, result)
-            return (result, 0)
+            return result
         return wrapper
     return request_decorator
 
