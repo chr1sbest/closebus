@@ -22,7 +22,6 @@ def request_cache(ttl_seconds=300):
             else:
                 result = func(self, *args, **kwargs)
                 redis_cache.setex(kwargs, ttl_seconds, result)
-            return result
+            return loads(result)
         return wrapper
     return request_decorator
-

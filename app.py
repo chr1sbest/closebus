@@ -8,7 +8,6 @@ app = Flask(__name__)
 api = restful.Api(app)
 
 class Departures(restful.Resource):
-
     @request_cache(ttl_seconds=90)
     def get(self, agency, stop_id):
         """
@@ -17,7 +16,6 @@ class Departures(restful.Resource):
         transport_api = agency_map[agency]()       # Determine Agency API
         data = transport_api.get(agency, stop_id)  # Request new data
         return data
-
 
 api.add_resource(Departures, \
     '/departures/<string:agency>/<string:stop_id>')

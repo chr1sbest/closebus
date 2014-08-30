@@ -51,7 +51,7 @@ class API_NextBus(AbstractAgency):
 
     def transform(self, response):
         """ 
-        Format XML response into JSON object with relevant info.
+        Format XML response into JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
         predictions = json_obj['body']['predictions']
