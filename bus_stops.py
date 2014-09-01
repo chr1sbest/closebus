@@ -6,24 +6,35 @@ def get_stop_id(place_id, key):
     """
     Scrape URL that corresponds with "place_id" to find bus_stop id.
     """
-    url = get_url(place_id, key)
-    r = get(url)
+    details = get_place_details(place_id, key)
+    r = get(details['url'])             # GET URL of place to parse
     soup = bs4.BeautifulSoup(r.text)
     try:
         stop_div = soup.select('div.tppjsc')[0].text
         stop_id = re.findall('(\d+)', stop_div)[0]
-        return stop_id
+        details['stop_id'] = stop_id
     except:
-        return "Stop Details Unavailable!"
+        details['stop_id'] = "Stop Details Unavailable!"
+    return details
 
-def get_url(place_id, key):
+def get_place_details(place_id, key):
     """
     Using "place_id", parse the JSON response for the URL.
     """
-    url = 'https://maps.googleapis.com/maps/api/place/details/json'
+    api_url = 'https://maps.googleapis.com/maps/api/place/details/json'
     params = ({'placeid': place_id, 'key': key})
-    r = get(url, params=params)
-    return r.json()['result']['url']
+    r = get(api_url, params=params).json()
+    name = r['result']['name'] or None
+    url = r['result']['url'] or None
+    website = r['result']['website'] or None
+    return {
+        'place_id': place_id,
+        'name': name, 
+        'url': url, 
+        'website': website
+    }
+
+
 
 if __name__ == "__main__":
     place_id = 'ChIJIzKCwid8hYARRAV-ixw4n68'
