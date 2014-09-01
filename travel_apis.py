@@ -72,6 +72,6 @@ class API_CalTrain(AbstractAgency):
 
 agency_map = {
     'sf-muni': API_NextBus,
-    'BART' : API_NextBus,
     'actransit' : API_NextBus,
+    'BART' : API_NextBus,
 }

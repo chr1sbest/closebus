@@ -2,7 +2,8 @@ var StopModel = Backbone.Model.extend({
   urlRoot : '/api/v1/stop_id/',
   defaults: {
     id: null,
-    stop_id: null
+    stop_id: null,
+    location: null
   }
 });
 
@@ -11,12 +12,8 @@ var StopCollection = Backbone.Collection.extend({
   model : StopModel
 });
 
-
 var AppView = Backbone.View.extend({
     el: $("#app"),
-
-    events: {},
-
     initialize: function(){
       var self = this;
       if ("geolocation" in navigator) {
@@ -55,11 +52,29 @@ var AppView = Backbone.View.extend({
         mapOptions);
 
       //Find nearby stops
+      this.buildDraggable(latlng);
       this.buildCircle(latlng);
       this.findNearbyStops(latlng);
     },
 
+    buildDraggable : function(latlng) {
+      var self = this;
+      var marker = new google.maps.Marker({
+       position: latlng,
+         map: this.map,
+         draggable:true,
+         title:"Drag me!"
+      });
+       google.maps.event.addListener(marker, 'dragend', function(){
+         var position = marker.getPosition();
+         self.buildCircle(position);
+         self.findNearbyStops(position);
+         self.map.panTo(position);  
+       });
+
+    },
     buildCircle : function(latlng){
+      if (this.radius) {this.radius.setMap(null);}
       var circleOptions = {
         strokeColor: '#FFFFFF',
         strokeOpacity: 0.8,
@@ -87,43 +102,47 @@ var AppView = Backbone.View.extend({
         if (status == google.maps.places.PlacesServiceStatus.OK){
           self.StopCollection = new StopCollection();
           _.each(stops, function(stop) {
-            var new_stop = self.buildStop(stop);
-            self.StopCollection.add(new_stop);
+            var NewStopModel = new StopModel({
+              id: stop.place_id,
+              location: stop.geometry.location
+            })
+            self.StopCollection.add(NewStopModel);
           })
         };
+        self.buildStops();
       })
     },
 
-    buildStop : function(stop) {
-      var NewStopModel = new StopModel({id: stop.place_id});
-      NewStopModel.fetch({
-        success: function(response) {
-          testing = response.get('stop_id')
-        },
-        error: function(response) {
-          console.log(response);
-        }
+    buildStops : function() {
+      var self = this;
+      self.StopCollection.each(function(model){
+        model.fetch({
+          success: function(response) {
+            var busIcon = {
+              url: "bus.png",
+              scaledSize: new google.maps.Size(20, 25),
+              origin: new google.maps.Point(0,0),
+              anchor: new google.maps.Point(0, 0)
+            }
+            var newStop = new google.maps.Marker({
+              map: self.map,
+              position: response.attributes.location,
+              icon: busIcon,
+              zIndex: 1,
+              title: response.attributes.stop_id
+            });
+            google.maps.event.addListener(newStop, 'click', function() {
+              var latitude = this.position.lat();
+              var longitude = this.position.lng();
+              console.log(this.title);
+            });
+          },
+          error: function(response) {
+            console.log(response);
+          }
+        });
       });
-      var location = stop.geometry.location;
-      var busIcon = {
-        url: "bus.png",
-        scaledSize: new google.maps.Size(20, 25),
-        origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(0, 0)
-      }
-      var newStop = new google.maps.Marker({
-        map: this.map,
-        position: location,
-        icon: busIcon,
-        zIndex: 1,
-        title: stop.name
-      });
-      google.maps.event.addListener(newStop, 'click', function() {
-        var latitude = this.position.lat();
-        var longitude = this.position.lng();
-      });
-      return NewStopModel;
-    },
+    }
 });
 
 // Load the application once the DOM is ready, using `jQuery.ready`:
