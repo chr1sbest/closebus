@@ -22,7 +22,7 @@ I need to plan accordingly to make the best usage of my time.
 
 4) Geolocation is new to me, shouldn't be too hard. There is probably like a Google Maps API that does the heavy lifting and returns lat/long coordinates. I should be able to use lat/long coordinates to get stop_id's to pass into requests made by Backbone.
 
-5) UI/UX is pretty fun, but constantly changing things around can be a time-sink. I'll attempt a simple design and try to keep the tweaks to a minimum. I'll stick to using Bootstrap, nothing too fancy.
+5) UI/UX can be pretty fun, but constantly changing things around can be a time-sink. I'll attempt a simple design and try to keep the tweaks to a minimum. I'll stick to using Bootstrap, nothing too fancy.
 
 6) It doesn't look like I'm going to be graded on load balancing or devops stuff, so I'd rather deploy to Heroku > EC2 (and its FREE!) This shouldn't take much time either. Most of the time I'll spend on Heroku will be configuring services.
 
@@ -75,6 +75,6 @@ Implemented the cache as a @decorator with TTL as an optional argument. The cach
     - With my TTL at 60s, I can theoretically maintain info on a maximum of 6,000 stops at a time before getting rate limited (minimum = 2,000)
     - Most importantly, the cache keeps duplicate requests from hitting the NextBus API.
 
-2) Backbone.js
+3) Backbone.js
 ----------
 
