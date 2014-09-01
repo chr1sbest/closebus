@@ -1,24 +1,45 @@
 from json import loads
-from flask import Flask
+from flask import Flask, render_template
 from flask.ext import restful
-from cache import request_cache
+from cache import cache_decorator
 from travel_apis import agency_map
+from bus_stops import get_stop_id
 
-app = Flask(__name__)
+API_KEY = 'AIzaSyDcJLsaTFkhg7SOacEp0eRjEma46AA-cHg'
+
+app = Flask(__name__, static_url_path='')
 api = restful.Api(app)
 
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
 class Departures(restful.Resource):
-    @request_cache(ttl_seconds=60)
+    @cache_decorator(expire=True, ttl_seconds=60)
     def get(self, agency, stop_id):
         """
-        Retrieve departure data from proper agency (or from redis cache).
+        Retrieve realtime departure data from proper agency 
+        (or from redis cache).
         """
-        transport_api = agency_map[agency]()       # Determine Agency API
+        transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
         return data
 
+class StopID(restful.Resource):
+    @cache_decorator(expire=False)
+    def get(self, place_id):
+        """
+        Retrieve StopID using BeautifulSoup and Google Places API
+        (or from redis cache).
+        """
+        stop_id = get_stop_id(place_id, API_KEY)
+        return stop_id 
+
 api.add_resource(Departures, \
-    '/departures/<string:agency>/<string:stop_id>')
+    '/api/v1/departures/<string:agency>/<string:stop_id>')
+
+api.add_resource(StopID, \
+    '/api/v1/stop_id/<string:place_id>')
 
 if __name__ == "__main__":
     app.run(debug=True)

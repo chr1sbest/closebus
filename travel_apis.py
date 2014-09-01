@@ -62,19 +62,16 @@ class API_NextBus(AbstractAgency):
 
 
 class API_511(AbstractAgency): #TODO
-    def __init__(self):
-        self.api_url = ''
-        self.params = {}
+    pass
 
-    def set_params(self, agency, stop_id):
-        pass
+class API_GreyHound(AbstractAgency):
+    pass
 
-    def transform(self, response):
-        pass
-
+class API_CalTrain(AbstractAgency):
+    pass
 
 agency_map = {
     'sf-muni': API_NextBus,
     'BART' : API_NextBus,
-    '511' : API_511,
+    'actransit' : API_NextBus,
 }
