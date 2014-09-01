@@ -24,15 +24,14 @@ class AbstractAgency(object):
         Each Agency API returns different data formats. Need to parse and
         transform each dataset into JSON in this format:
 
-        {'6-Parnassus': 
-            {'title': 'Inbound to Downtown'
-                {'prediction':
-                    [
-                        {'@seconds': 500},
-                        {'@seconds': 1000},
-                        {'@seconds': 1500},
-                    ]
-                }
+        {'6-Parnassus': {
+            'title': 'Inbound to Downtown',
+            'prediction':
+                [
+                    {'@seconds': 500},
+                    {'@seconds': 1000},
+                    {'@seconds': 1500},
+                ]
             }
         }
 
@@ -54,11 +53,16 @@ class API_NextBus(AbstractAgency):
         Format XML response into JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
-        predictions = json_obj['body']['predictions']
-        next_busses = filter(lambda x: x.has_key('direction'), predictions)
-        routes = map(lambda bus: bus['@routeTitle'], next_busses)
-        predictions = map(lambda bus: bus['direction'], next_busses)
-        return dict(zip(routes, predictions))
+        busses = json_obj['body']['predictions']
+        if type(busses) == list:    # Handle multiple values.
+            busses = filter(lambda x: x.get('direction', False), busses)
+            routes = map(lambda bus: bus.get('@routeTitle', None), busses)
+            predictions = map(lambda bus: bus.get('direction', None), busses)
+            return dict(zip(routes, predictions))
+        else:                       # Handle single value.
+            route = busses.get('@routeTitle', None)
+            prediction = busses.get('direction', None)
+            return {'route': route, 'prediction': prediction}
 
 
 class API_BART(AbstractAgency): #TODO

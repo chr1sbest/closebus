@@ -49,7 +49,7 @@ def get_place_details(place_id, key):
 
 website_map = {
     "http://pt.berkeley.edu/around/transit/shuttles": 'berkeley',
-    "http://www.actransit.org/": 'ac-transit',
+    "http://www.actransit.org/": 'actransit',
     "http://www.sfmta.com/": 'sf-muni',
 }
 

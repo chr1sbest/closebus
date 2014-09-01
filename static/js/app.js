@@ -135,11 +135,11 @@ var MapView = Backbone.View.extend({
       self.StopCollection.each(function(model){
         model.fetch({
           success: function(response) {
-            // Only add markers for sf-muni, ac-transit, and Berkeley.
-            var agencies = ['sf-muni', 'ac-transit', 'berkeley'];
+            // Only add markers for sf-muni and actransit.
+            var agencies = ['sf-muni', 'actransit'];
             var icon_urls = {
               'sf-muni': 'images/muni.png', 
-              'ac-transit': 'images/ac.png',
+              'actransit': 'images/ac.png',
               'berkeley': 'images/berkeley.png'
             }
             if (agencies.indexOf(response.attributes.agency) >= 0 &&
@@ -163,7 +163,7 @@ var MapView = Backbone.View.extend({
                 agency: response.attributes.agency
               });
               google.maps.event.addListener(newStop, 'click', function() {
-                self.displayTimes(newStop);
+                self.buildWindow(newStop)
               });
             }
           },
@@ -173,8 +173,41 @@ var MapView = Backbone.View.extend({
         });
       });
     },
-    displayTimes: function(stop){
-      console.log(stop);
+
+    buildWindow: function(stop) {
+      // Build Google Maps InfoWindow with real-time estimates.
+      var self = this;
+      self.getTimes(stop);
+      var infowindow = new google.maps.InfoWindow({
+          content: self.busses[0]
+      });
+      infowindow.open(self.map, stop);
+    },
+
+    getTimes: function(stop){
+      // Synchronous GET request to departures API for realtime travel info.
+      var self = this;
+      var base_url = 'api/v1/departures/';
+      var agency = stop.agency;
+      self.busses = [];
+      _.each(stop.stop_ids, function(stop_id){
+        $.ajax({
+          url: base_url + agency + '/' + stop_id, 
+          type: 'get',
+          async: false,
+          contentType: "application/json;",
+          dataType: "json",
+          success: function(response){
+            self.renderResponse(response);
+          }
+        });
+      });
+      return self;
+    },
+
+    renderResponse: function(response){
+      console.log(JSON.stringify(response));
+      this.busses.push(JSON.stringify(response));
     }
 });
 
