@@ -1,6 +1,5 @@
 import redis
 from json import loads
-from datetime import datetime
 from functools import wraps
 
 redis_cache = redis.StrictRedis()

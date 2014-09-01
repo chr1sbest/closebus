@@ -51,7 +51,6 @@ var AppView = Backbone.View.extend({
       this.map = new google.maps.Map(document.getElementById('map_canvas'),
         mapOptions);
 
-      //Find nearby stops
       this.buildDraggable(latlng);
       this.buildCircle(latlng);
       this.findNearbyStops(latlng);
@@ -63,7 +62,7 @@ var AppView = Backbone.View.extend({
        position: latlng,
          map: this.map,
          draggable:true,
-         title:"Drag me!"
+         title:""
       });
        google.maps.event.addListener(marker, 'dragend', function(){
          var position = marker.getPosition();
