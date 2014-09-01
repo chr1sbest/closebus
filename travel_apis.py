@@ -58,7 +58,7 @@ class API_NextBus(AbstractAgency):
         next_busses = filter(lambda x: x.has_key('direction'), predictions)
         routes = map(lambda bus: bus['@routeTitle'], next_busses)
         predictions = map(lambda bus: bus['direction'], next_busses)
-        return json.dumps(dict(zip(routes, predictions)))
+        return dict(zip(routes, predictions))
 
 
 class API_511(AbstractAgency): #TODO

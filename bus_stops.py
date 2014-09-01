@@ -9,9 +9,12 @@ def get_stop_id(place_id, key):
     url = get_url(place_id, key)
     r = get(url)
     soup = bs4.BeautifulSoup(r.text)
-    stop_div = soup.select('div.tppjsc')[0].text
-    stop_id = re.findall('(\d+)', stop_div)[0]
-    return stop_id
+    try:
+        stop_div = soup.select('div.tppjsc')[0].text
+        stop_id = re.findall('(\d+)', stop_div)[0]
+        return stop_id
+    except:
+        return "Stop Details Unavailable!"
 
 def get_url(place_id, key):
     """

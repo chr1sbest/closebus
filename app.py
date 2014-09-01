@@ -1,4 +1,4 @@
-from json import loads
+from json import dumps
 from flask import Flask, render_template
 from flask.ext import restful
 from cache import cache_decorator
@@ -23,7 +23,7 @@ class Departures(restful.Resource):
         """
         transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
-        return data
+        return dumps(data)
 
 class StopID(restful.Resource):
     @cache_decorator(expire=False)
@@ -33,7 +33,7 @@ class StopID(restful.Resource):
         (or from redis cache).
         """
         stop_id = get_stop_id(place_id, API_KEY)
-        return stop_id 
+        return dumps({'id': place_id, 'stop_id': stop_id})
 
 api.add_resource(Departures, \
     '/api/v1/departures/<string:agency>/<string:stop_id>')
