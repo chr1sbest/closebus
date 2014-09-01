@@ -61,7 +61,7 @@ class API_NextBus(AbstractAgency):
         return dict(zip(routes, predictions))
 
 
-class API_511(AbstractAgency): #TODO
+class API_BART(AbstractAgency): #TODO
     pass
 
 class API_GreyHound(AbstractAgency):
@@ -73,5 +73,5 @@ class API_CalTrain(AbstractAgency):
 agency_map = {
     'sf-muni': API_NextBus,
     'actransit' : API_NextBus,
-    'BART' : API_NextBus,
+    'BART' : API_BART
 }
