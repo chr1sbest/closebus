@@ -2,7 +2,10 @@ var StopModel = Backbone.Model.extend({
   urlRoot : '/api/v1/stop_id/',
   defaults: {
     id: null,
-    stop_id: null,
+    name: null,
+    stop_ids: null,
+    url: null,
+    website: null,
     location: null
   }
 });
@@ -128,7 +131,7 @@ var AppView = Backbone.View.extend({
               position: response.attributes.location,
               icon: busIcon,
               zIndex: 1,
-              title: response.attributes.stop_id
+              title: response.attributes.stop_ids[0]
             });
             google.maps.event.addListener(newStop, 'click', function() {
               var latitude = this.position.lat();

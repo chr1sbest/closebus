@@ -10,11 +10,12 @@ def get_stop_id(place_id, key):
     r = get(details['url'])             # GET URL of place to parse
     soup = bs4.BeautifulSoup(r.text)
     try:
-        stop_div = soup.select('div.tppjsc')[0].text
-        stop_id = re.findall('(\d+)', stop_div)[0]
-        details['stop_id'] = stop_id
+        stop_divs = soup.select('div.tppjsc')
+        stop_ids = map(lambda div: re.findall('(\d+)', div.text), stop_divs)
+        stop_ids = reduce(lambda x, y: x + y, stop_ids)
+        details['stop_ids'] = stop_ids
     except:
-        details['stop_id'] = "Stop Details Unavailable!"
+        details['stop_ids'] = "Unavailable"
     return details
 
 def get_place_details(place_id, key):
@@ -33,8 +34,6 @@ def get_place_details(place_id, key):
         'url': url, 
         'website': website
     }
-
-
 
 if __name__ == "__main__":
     place_id = 'ChIJIzKCwid8hYARRAV-ixw4n68'
