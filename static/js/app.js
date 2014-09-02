@@ -1,28 +1,3 @@
-var StopModel = Backbone.Model.extend({
-  // Model that represents a bus stop and relevant details.
-  urlRoot : '/api/v1/stop_id/',
-  defaults: {
-    id: null,
-    name: null,
-    stop_ids: null,
-    url: null,
-    website: null,
-    location: null
-  }
-});
-
-var StopCollection = Backbone.Collection.extend({
-  // Collection of bus stops.
-  url : '#',
-  model : StopModel
-});
-
-
-var WelcomeView = Backbone.Modal.extend({
-  template: _.template(templates.welcome),
-    cancelEl: '.bbm-button'
-});
-
 var MapView = Backbone.View.extend({
   // Main application view.
     el: $("#app"),
@@ -136,18 +111,18 @@ var MapView = Backbone.View.extend({
         model.fetch({
           success: function(response) {
             // Only add markers for sf-muni and actransit.
-            var agencies = ['sf-muni', 'actransit'];
+            var agencies = ['sf-muni', 'actransit', 'berkeley'];
             var icon_urls = {
-              'sf-muni': 'images/muni.png', 
-              'actransit': 'images/ac.png',
-              'berkeley': 'images/berkeley.png'
+              "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
+              "http://www.actransit.org/": 'images/ac.png',
+              "http://www.sfmta.com/": 'images/muni.png-',
             }
             if (agencies.indexOf(response.attributes.agency) >= 0 &&
             response.attributes.stop_ids !== 'Unavailable'){
               // The agency is supported and has stop_ids.
               var color
               var busIcon = {
-                url: icon_urls[response.attributes.agency],
+                url: icon_urls[response.attributes.website],
                 scaledSize: new google.maps.Size(20, 25),
                 origin: new google.maps.Point(0,0),
                 anchor: new google.maps.Point(0, 0)
@@ -177,39 +152,123 @@ var MapView = Backbone.View.extend({
     buildWindow: function(stop) {
       // Build Google Maps InfoWindow with real-time estimates.
       var self = this;
-      self.getTimes(stop);
       var infowindow = new google.maps.InfoWindow({
-          content: self.busses[0]
+          content: "Loading.."
       });
       infowindow.open(self.map, stop);
+      self.getTimes(stop, infowindow);
     },
 
-    getTimes: function(stop){
-      // Synchronous GET request to departures API for realtime travel info.
+    getTimes: function(stop, infowindow){
       var self = this;
-      var base_url = 'api/v1/departures/';
-      var agency = stop.agency;
-      self.busses = [];
-      _.each(stop.stop_ids, function(stop_id){
-        $.ajax({
-          url: base_url + agency + '/' + stop_id, 
-          type: 'get',
-          async: false,
-          contentType: "application/json;",
-          dataType: "json",
-          success: function(response){
-            self.renderResponse(response);
-          }
-        });
-      });
-      return self;
+      var newRoute = new RouteView({
+        agency: stop.agency,
+        stop_id: stop.stop_ids[0],
+        website: stop.website,
+        infowindow: infowindow
+      })
+      newRoute.model.fetch();
     },
 
     renderResponse: function(response){
-      console.log(JSON.stringify(response));
-      this.busses.push(JSON.stringify(response));
+      _.each(response, function(value, key) {
+        var test = new RouteView({
+          title: value['@title'], 
+          predictions: value['prediction'],
+          parent: null
+        });
+      });
+      console.log(response)
+      this.busses.push(response);
     }
 });
+
+var StopView = Backbone.View.extend({
+  el: '#routes',
+  template: _.template(""),
+  initialize: function(options){
+    this.children = options.children || null;
+    this.title = options.title || null;
+  },
+  render: function(){
+    this.template
+  }
+})
+
+var RouteView = Backbone.View.extend({
+  el: $('#sup')[0],
+  template: _.template(templates.route),
+  initialize: function(options){
+    this.parent = options.parent;
+    this.infowindow = options.infowindow
+    this.model = new RouteModel({
+      title: options.title,
+      agency: options.agency,
+      stop_id: options.stop_id,
+      predictions: options.predictions,
+      website: options.website,
+      view: this,
+    })
+  },
+  render: function(){
+    var rendered = this.template(this.model.attributes);
+    this.infowindow.setContent(rendered);
+    return this;
+  }
+});
+
+var WelcomeView = Backbone.Modal.extend({
+  // Displays welcome modal with instructions.
+  template: _.template(templates.welcome),
+  cancelEl: '.bbm-button'
+});
+
+var RouteModel = Backbone.Model.extend({
+  // Maps to a single route.
+  init: function(options){
+    this.agency = options.agency;
+    this.stop_id = options.stop_id;
+    this.website = options.website;
+    this.view = options.view;
+  },
+  url: function(){
+    var baseURL = 'api/v1/departures/';
+    return baseURL + this.get('agency') + '/' + this.get('stop_id');
+  },
+  parse: function(response){
+    this.set('title', _.keys(response)[0]);
+    if (Array.isArray(_.values(response)[0])){
+      this.set('direction', _.values(response)[0][0]['@title']);
+      this.set('predictions', _.values(response)[0][0]['prediction']);
+    } else if(_.values(response)[0] == null){
+      this.set('direction', "Not in service");
+    } else {
+      this.set('direction', _.values(response)[0]['@title'] || null);
+      this.set('predictions', _.values(response)[0]['prediction'] || null);
+    }
+    this.attributes.view.render();
+  }
+})
+
+var StopModel = Backbone.Model.extend({
+  // Model that represents a bus stop and relevant details.
+  urlRoot : '/api/v1/stop_id/',
+  defaults: {
+    id: null,
+    name: null,
+    stop_ids: null,
+    url: null,
+    website: null,
+    location: null
+  }
+});
+
+var StopCollection = Backbone.Collection.extend({
+  // Collection of bus stops.
+  url : '#',
+  model : StopModel
+});
+
 
 // Initialize App
 var Map = null;

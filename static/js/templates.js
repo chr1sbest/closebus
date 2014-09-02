@@ -1,4 +1,24 @@
 var templates = {}
+
+//Template for route popup
+templates.route = "\
+  <div>\
+    <h2> <%= title %> </h2>\
+    <h3> <%= direction %> </h3>\
+    <% Array.isArray(predictions) ? _.each(predictions, function(value) { %>\
+      <li>\
+         <ul><%= Math.floor(value['@seconds']/ 60) < 2 ? 'Arriving soon!' : Math.floor(value['@seconds']/60) + ' minutes' %></ul>\
+       </li>\
+    <% }) :  %>\
+      <li>\
+         <ul><%= Math.floor(predictions['@seconds']/ 60) < 2 ? 'Arriving soon!' : Math.floor(predictions['@seconds']/60) + ' minutes' %></ul>\
+       </li>\
+    <% ; %>\
+    <a href='<%= website %>' >Route Info</a>\
+  </div>\
+";
+
+//Template for welcome message
 templates.welcome = " \
   <div class='bbm-modal__topbar'> \
       <h3 class='bbm-modal__title'>CloseBus</h3> \
@@ -15,16 +35,5 @@ templates.welcome = " \
       <span style='float-left'>&copy; Chris Best 2014</span>\
       <a href='#' class='bbm-button'>Close</a>\
   </div>\
-"
+";
 
-templates.arrivals = " \
-  <div class='bbm-modal__topbar'> \
-      <h3 class='bbm-modal__title'> <%= title =%> </h3> \
-    </div>\
-    <div class='bbm-modal__section'>\
-      <p>Arrival Times</p>\
-      <ul>\
-      </ul>\
-    </div>\
-  </div>\
-"
