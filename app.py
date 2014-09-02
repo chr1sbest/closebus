@@ -11,7 +11,18 @@ api = restful.Api(app)
 
 @app.route('/')
 def index():
+    """ Serve static index page for single-page app frontend."""
     return app.send_static_file('index.html')
+
+class StopID(restful.Resource):
+    @cache_decorator(expire=False)
+    def get(self, place_id):
+        """
+        Retrieve StopID using BeautifulSoup and Google Places API
+        (or from redis cache).
+        """
+        data = get_stop_id(place_id, API_KEY)
+        return dumps(data)
 
 class Departures(restful.Resource):
     @cache_decorator(expire=True, ttl_seconds=60)
@@ -29,21 +40,11 @@ class Departures(restful.Resource):
             return e
         return dumps(data)
 
-class StopID(restful.Resource):
-    @cache_decorator(expire=False)
-    def get(self, place_id):
-        """
-        Retrieve StopID using BeautifulSoup and Google Places API
-        (or from redis cache).
-        """
-        data = get_stop_id(place_id, API_KEY)
-        return dumps(data)
+api.add_resource(StopID, \
+    '/api/v1/stop_id/<string:place_id>')
 
 api.add_resource(Departures, \
     '/api/v1/departures/<string:agency>/<string:stop_id>')
 
-api.add_resource(StopID, \
-    '/api/v1/stop_id/<string:place_id>')
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
