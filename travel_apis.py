@@ -53,6 +53,7 @@ class API_NextBus(AbstractAgency):
         Format XML response into JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
+        print json_obj
         busses = json_obj['body']['predictions']
         if type(busses) == list:    # Handle multiple values.
             busses = filter(lambda x: x.get('direction', False), busses)
@@ -77,5 +78,6 @@ class API_CalTrain(AbstractAgency):
 agency_map = {
     'sf-muni': API_NextBus,
     'actransit' : API_NextBus,
+    'berkeley' : API_NextBus,
     'BART' : API_BART
 }
