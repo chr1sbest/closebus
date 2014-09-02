@@ -115,7 +115,7 @@ var MapView = Backbone.View.extend({
             var icon_urls = {
               "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
               "http://www.actransit.org/": 'images/ac.png',
-              "http://www.sfmta.com/": 'images/muni.png-',
+              "http://www.sfmta.com/": 'images/muni.png'
             }
             if (agencies.indexOf(response.attributes.agency) >= 0 &&
             response.attributes.stop_ids !== 'Unavailable'){
@@ -207,7 +207,7 @@ var RouteView = Backbone.View.extend({
       stop_id: options.stop_id,
       predictions: options.predictions,
       website: options.website,
-      view: this,
+      view: this
     })
   },
   render: function(){
