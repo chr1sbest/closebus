@@ -4,8 +4,7 @@ from flask.ext import restful
 from cache import cache_decorator
 from travel_apis import agency_map
 from bus_stops import get_stop_id
-
-API_KEY = 'AIzaSyDcJLsaTFkhg7SOacEp0eRjEma46AA-cHg'
+from settings import API_KEY
 
 app = Flask(__name__, static_url_path='')
 api = restful.Api(app)

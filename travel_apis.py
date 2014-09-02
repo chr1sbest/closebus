@@ -53,7 +53,6 @@ class API_AC_Transit(AbstractAgency):
         Format XML response into JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
-        print json_obj
         busses = json_obj['body']['predictions']
         if type(busses) == list:    # Handle multiple values.
             busses = filter(lambda x: x.get('direction', False), busses)
