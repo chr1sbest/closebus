@@ -1,4 +1,4 @@
-var RouteModel = Backbone.Model.extend({
+var RoutesModel = Backbone.Model.extend({
   // Maps to a single route.
   init: function(options){
     this.agency = options.agency;
@@ -11,16 +11,30 @@ var RouteModel = Backbone.Model.extend({
     return baseURL + this.get('agency') + '/' + this.get('stop_id');
   },
   parse: function(response){
-    this.set('title', _.keys(response)[0]);
-    if (Array.isArray(_.values(response)[0])){
-      this.set('direction', _.values(response)[0][0]['@title']);
-      this.set('predictions', _.values(response)[0][0]['prediction']);
-    } else if(_.values(response)[0] == null){
-      this.set('direction', "Not in service");
-    } else {
-      this.set('direction', _.values(response)[0]['@title'] || null);
-      this.set('predictions', _.values(response)[0]['prediction'] || null);
-    }
+    var self = this;
+    // Build bus objects to hold info for each bus in the response.
+    var busObjs = _.map(_.keys(response), function(bus) {
+      var tmp = {}
+      tmp[bus] = {}
+      return tmp
+    });
+    this.set('busses', busObjs);
+    _.each(this.get('busses'), function(bus, index){
+      var busses = self.get('busses');
+      var route = _.keys(busses[index])[0];
+      if (Array.isArray(response[route])){
+        // Code to handle multiple busses of same name. Rewrite later.
+        // For now I'll just take the first value.
+        busses[index]['title'] = route;
+        busses[index]['direction'] = response[route][0]['@title'];
+        busses[index]['predictions'] = response[route][0]['prediction'];
+      } else {
+      busses[index]['title'] = route;
+      busses[index]['direction'] = response[route]['@title'];
+      busses[index]['predictions'] = response[route]['prediction'];
+      }
+    });
+    //Render the view now that all the bus data is formatted.
     this.attributes.view.render();
   }
 })

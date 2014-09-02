@@ -12,5 +12,6 @@ ul {
 }
 
 .gm-style-iw{
-    width: 150px
+    width: 150px;
+    max-height: 300px;
 }

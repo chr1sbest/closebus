@@ -14,7 +14,6 @@ templates.route = "\
          <ul><%= Math.floor(predictions['@seconds']/ 60) < 2 ? 'Arriving soon!' : Math.floor(predictions['@seconds']/60) + ' minutes' %></ul>\
        </li>\
     <% ; %>\
-    <a href='<%= website %>' >Route Info</a>\
   </div>\
 ";
 
@@ -35,5 +34,10 @@ templates.welcome = " \
       <span style='float-left'>&copy; Chris Best 2014</span>\
       <a href='#' class='bbm-button'>Close</a>\
   </div>\
+";
+
+//Template for website
+templates.website = "\
+<a target='_blank' href='<%= website %>' >Route Info</a>\
 ";
 
