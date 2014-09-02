@@ -49,4 +49,4 @@ api.add_resource(Departures, \
     '/api/v1/departures/<string:agency>/<string:stop_id>')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
