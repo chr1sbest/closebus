@@ -1,29 +1,23 @@
 from requests import get
-import bs4
-import re
+from stop_id_strategies import strategy_crawler, strategy_location_mapper
 
 def get_stop_id(place_id, key):
     """
-    Scrape URL that corresponds with "place_id" to find bus_stop id.
-
-    Google Places unfortunately does not return stop_id, a vital
-    component for our realtime NextBus query. Fortunately, they do give
-    us details for a URL which maps to a page that contains details on
-    "stop_id"!
+    Use multiple strategies to mine for "stop_id" that corresponds to
+    the specific place.
+   
+    Default strategy is a crawler.
     """
     # Get the details and url from Google Places API
     details = get_place_details(place_id, key)
-    r = get(details['url'])
-    soup = bs4.BeautifulSoup(r.text)
-    try:
-        # Regex any div with class 'tppjsc' for a stop_id number
-        stop_divs = soup.select('div.tppjsc')
-        stop_ids = map(lambda div: re.findall('(\d+)', div.text), stop_divs)
-        stop_ids = reduce(lambda x, y: x + y, stop_ids)
-        details['stop_ids'] = list(set(stop_ids))   # Remove duplicates
-    except:
-        details['stop_ids'] = "Unavailable"
-    return details
+    # Try each strategy to retrive stop_id details
+    strategies = [strategy_crawler, strategy_location_mapper]
+    for strategy in strategies:
+        details = strategy(details)
+        # If strategy successful, stop_id's will be populated.
+        if details['stop_ids'] != "Unavailable":
+            return details
+    return False
 
 def get_place_details(place_id, key):
     """
