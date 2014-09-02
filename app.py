@@ -23,6 +23,7 @@ class StopID(restful.Resource):
         Retrieve StopID using BeautifulSoup and Google Places API
         (or from redis cache).
         """
+        return {'hello': 'testing'}
         data = get_stop_id(place_id, API_KEY)
         if data:
             return dumps(data)
