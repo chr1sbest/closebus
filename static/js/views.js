@@ -107,7 +107,6 @@ var MapView = Backbone.View.extend({
     self.StopCollection.each(function(model){
       model.fetch({
         success: function(response) {
-          console.log(response);
           // Only add markers for actransit, and berkeley shuttles. sf-muni next!
           var agencies = ['actransit', 'berkeley'];
           var icon_urls = {
