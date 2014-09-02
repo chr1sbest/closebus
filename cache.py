@@ -1,10 +1,11 @@
 import redis
 import os
+import urlparse
 from json import loads
 from functools import wraps
-from settings import REDIS_URL
 
-redis_cache = redis.from_url(REDIS_URL)
+url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost'))
+redis_cache = redis.from_url(url)
 
 def cache_decorator(expire=True, ttl_seconds=300):
     """
