@@ -62,7 +62,7 @@ class API_NextBus(AbstractAgency):
         else:                       # Handle single value.
             route = busses.get('@routeTitle', None)
             prediction = busses.get('direction', None)
-            return {'route': route, 'prediction': prediction}
+            return {route: prediction}
 
 
 class API_BART(AbstractAgency): #TODO
