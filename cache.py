@@ -1,8 +1,10 @@
 import redis
+import os
 from json import loads
 from functools import wraps
+from settings import REDIS_URL
 
-redis_cache = redis.StrictRedis()
+redis_cache = redis.from_url(REDIS_URL)
 
 def cache_decorator(expire=True, ttl_seconds=300):
     """
@@ -20,7 +22,7 @@ def cache_decorator(expire=True, ttl_seconds=300):
             else:
                 result = func(self, *args, **kwargs)
                 if expire == True:
-                    redis_cache.setex(kwargs, ttl_seconds, result)
+                    redis_cache.setex(kwargs, result, ttl_seconds)
                 else:
                     redis_cache.set(kwargs, result)
             return loads(result)
