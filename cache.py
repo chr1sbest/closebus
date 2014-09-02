@@ -5,7 +5,7 @@ from json import loads
 from functools import wraps
 
 url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost'))
-redis_cache = redis.from_url(url)
+redis_cache = redis.Redis(url)
 
 def cache_decorator(expire=True, ttl_seconds=300):
     """
