@@ -108,8 +108,8 @@ var MapView = Backbone.View.extend({
       model.fetch({
         success: function(response) {
           console.log(response);
-          // Only add markers for sf-muni, actransit, and berkeley shuttles.
-          var agencies = ['sf-muni', 'actransit', 'berkeley'];
+          // Only add markers for actransit, and berkeley shuttles. sf-muni next!
+          var agencies = ['actransit', 'berkeley'];
           var icon_urls = {
             "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
             "http://www.actransit.org/": 'images/ac.png',
