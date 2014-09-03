@@ -1,4 +1,4 @@
-from json import dumps, loads
+from json import dumps
 from flask import Flask 
 from flask.ext import restful
 from cache import cache_decorator
@@ -15,7 +15,7 @@ def index():
     return app.send_static_file('index.html')
 
 class StopID(restful.Resource):
-    #@cache_decorator(expire=False)
+    @cache_decorator(expire=False)
     def get(self, place_id):
         """
         Retrieve StopID using BeautifulSoup and Google Places API
@@ -23,7 +23,7 @@ class StopID(restful.Resource):
         """
         data = get_stop_id(place_id, API_KEY)
         if data:
-            return loads(dumps(data))
+            return dumps(data)
         else:
             return {
                 'status': 400, 
@@ -31,7 +31,7 @@ class StopID(restful.Resource):
             }
 
 class Departures(restful.Resource):
-    #@cache_decorator(expire=True, ttl_seconds=60)
+    @cache_decorator(expire=True, ttl_seconds=60)
     def get(self, agency, stop_id):
         """
         Retrieve realtime departure data from proper agency 
@@ -40,7 +40,7 @@ class Departures(restful.Resource):
         transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
         if data:
-            return loads(dumps(data))
+            return dumps(data)
         else:
             return {
                 'status': 400, 
