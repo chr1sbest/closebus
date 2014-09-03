@@ -40,7 +40,7 @@ class Departures(restful.Resource):
         transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
         if data:
-            return dumps(data)
+            return loads(dumps(data))
         else:
             return {
                 'status': 400, 
