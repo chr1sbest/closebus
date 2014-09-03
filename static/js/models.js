@@ -22,16 +22,23 @@ var RoutesModel = Backbone.Model.extend({
     _.each(this.get('busses'), function(bus, index){
       var busses = self.get('busses');
       var route = _.keys(busses[index])[0];
-      if (Array.isArray(response[route])){
-        // Code to handle multiple busses of same name. Rewrite later.
-        // For now I'll just take the first value.
+      if (response[route] === null){
+        // Handles busses that aren't in service.
         busses[index]['title'] = route;
-        busses[index]['direction'] = response[route][0]['@title'];
-        busses[index]['predictions'] = response[route][0]['prediction'];
+        busses[index]['direction'] = null;
+        busses[index]['predictions'] = {'@seconds': null};
       } else {
-      busses[index]['title'] = route;
-      busses[index]['direction'] = response[route]['@title'];
-      busses[index]['predictions'] = response[route]['prediction'];
+        if (Array.isArray(response[route])){
+          // Code to handle multiple busses of same name. Rewrite later.
+          // For now I'll just take the first value.
+          busses[index]['title'] = route;
+          busses[index]['direction'] = response[route][0]['@title'];
+          busses[index]['predictions'] = response[route][0]['prediction'];
+        } else {
+        busses[index]['title'] = route;
+        busses[index]['direction'] = response[route]['@title'];
+        busses[index]['predictions'] = response[route]['prediction'];
+        }
       }
     });
     //Render the view now that all the bus data is formatted.
