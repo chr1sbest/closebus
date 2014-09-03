@@ -120,7 +120,7 @@ var MapView = Backbone.View.extend({
             var color
             var busIcon = {
               url: icon_urls[response.attributes.website],
-              scaledSize: new google.maps.Size(20, 25),
+              scaledSize: new google.maps.Size(24, 32),
               origin: new google.maps.Point(0,0),
               anchor: new google.maps.Point(0, 0)
             }
