@@ -39,7 +39,7 @@ class AbstractAgency(object):
         """
         raise NotImplementedError
 
-class API_AC_Transit(AbstractAgency):
+class API_NextBus(AbstractAgency):
     def __init__(self):
         self.api_url = 'http://webservices.nextbus.com/service/publicXMLFeed'
         self.params = {'command': 'predictions'}
@@ -64,9 +64,6 @@ class API_AC_Transit(AbstractAgency):
             prediction = busses.get('direction', None)
             return {route: prediction}
 
-class API_Muni(AbstractAgency): #TODO
-    pass
-
 class API_BART(AbstractAgency): #TODO
     pass
 
@@ -77,8 +74,8 @@ class API_CalTrain(AbstractAgency):
     pass
 
 agency_map = {
-    'actransit' : API_AC_Transit,
-    'berkeley' : API_AC_Transit,
+    'actransit' : API_NextBus,
+    'berkeley' : API_NextBus,
     'BART' : API_BART,
-    'sf-muni': API_Muni
+    'sf-muni': API_NextBus
 }

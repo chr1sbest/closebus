@@ -22,13 +22,7 @@ class StopID(restful.Resource):
         (or from redis cache).
         """
         data = get_stop_id(place_id, API_KEY)
-        if data:
-            return dumps(data)
-        else:
-            return {
-                'status': 400, 
-                'message': 'Retrieval of stop failed.'
-            }
+        return dumps(data)
 
 class Departures(restful.Resource):
     @cache_decorator(expire=True, ttl_seconds=60)
