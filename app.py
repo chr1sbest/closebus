@@ -28,8 +28,7 @@ class StopID(restful.Resource):
         else:
             return {
                 'status': 400, 
-                'message': 'Retrieval of stop failed',
-                'API_KEY': API_KEY
+                'message': 'Retrieval of stop failed.'
             }
 
 class Departures(restful.Resource):
