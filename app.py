@@ -2,9 +2,9 @@ from json import dumps
 from flask import Flask 
 from flask.ext import restful
 from settings import API_KEY
-from backend.redis_cache import cache_decorator
-from backend.travel_apis import agency_map
-from backend.bus_stops import get_stop_id
+from redis_cache import cache_decorator
+from departures.travel_apis import agency_map
+from stop_ids.bus_stops import get_stop_id
 
 app = Flask(__name__, static_url_path='')
 api = restful.Api(app)
