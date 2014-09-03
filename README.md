@@ -13,7 +13,7 @@ I chose to build out CloseBus for two main reasons:
 
 Technical Stack Overview
 ---
-I chose to split my time evenly between the frontend and backend as a **full-stack** engineer. The full stack includes a RESTful interface built on Python **Flask**, front end single-page app built with **Backbone.js** and a **Redis** cache. The application is currently deployed to **Heroku** on http://closebus.herokuapp.com.
+I chose to split my time evenly between the frontend and backend as a **full-stack** engineer. The full stack includes a RESTful interface built on Python **Flask**, front end single-page app built with **Backbone.js**, and a **Redis** cache. The application is currently deployed to **Heroku** on http://closebus.herokuapp.com.
 
 I chose **Flask** because it is incredibly lightweight and easy to quickly prototype API's and applications in general. Unfortunately, running on CPython, I'm not able to effectively use multi-threading due to the GIL. Flask is my framework of choice for building small projects.
 
@@ -37,7 +37,7 @@ The backend consists of three main steps
 Nearby Stops
 ----
 
-The **/stop_ids** endpoint mainly serves as an adapter to the Google Places API.
+The **/stop_id** endpoint mainly serves as an adapter to the Google Places API.
 
 I chose to implement the chain of responsibility pattern in this attempt to find stop_id's. Currently, the only strategy is to crawl the Google Places URL (strategy details below), but the app is built to successively try strategies until a stop_id is returned. The app lazily finds new stops (in a radius of the user's marker location) and caches them.
 
@@ -50,18 +50,18 @@ Querying Travel API's
 
 The **/departures** endpoint serves as an adapter to transit agencies.
 
-I wrote out an **AbstractAgency* class to hold contractual details for each transit agency class to implement specific methods and return specific data. Each Agency basically needs to make a get request with parameters and translate the response into uniform JSON data that can be used by the frontend.
+I wrote out an **AbstractAgency** class to hold contractual details for each TransitAgency to implement specific methods and return specific data. Each TransitAgency needs to make a get request with correct parameters and translate the response into uniform JSON data that can be used by the frontend.
 
-Currently the only transit agency I have completed is NextBus, although it is very easily extendable. 
+Currently the only TransitAgency I have completed is NextBus, although it is very easily extendable. 
 
 Caching
 -----
 
-Realtime data is cached on a 60 second TTL, {place: stop_id} is cached ~permanently.
+Realtime data is cached on a 60 second TTL. {Place: stop_id} is cached ~permanently.
 
-NextBus will rate limit me at 2mb/20s. Each request is around 1kb -- 100 requests a second for 20 seconds would get me rate limited. With requests cached with 60s TTL, I could prevent duplicate requests for realtime travel estimates of a specific stop and theoretically maintain information on a minimum of 2,000 different stops at a time and a maximum of 6,000. 
+NextBus will rate limit me at 2mb/20s. With each request around 1kb, making 100 requests a second for 20 seconds would get me rate limited. With requests cached on a 60s TTL, I could prevent duplicate requests for realtime travel estimates of a specific stop and theoretically maintain information on a minimum of 2,000 different stops at a time and a maximum of 6,000. 
 
-Mapping places to stop_id's was kind of a big hassle (written above in the crawler strategy), and I felt that it was best to cache these as well. If a user discovers a new bus stop, the bus stop has to jump through a bunch of hoops to discover its stop_id, this is then cached. The next time any user is in vicinity of the bus stop, the stop_id will be returned immediately due to it being cached. As a side effect, this also could encourage users to explore and play with the app!
+Mapping places to stop_id's is currently a big hassle (**see crawler strategy**), and I felt that it was best to cache these as well. The first time a bus stop is in a user's vicinity, the crawling strategy is executed. The next time any user is in vicinity of the bus stop, the stop_id will be returned immediately from the cache. As a side effect, this *feature* could encourage users to explore and play with the app to find new stops!
 
 The cache is written as a decorator that I can easily throw onto RESTful methods (yay Python!)
 
@@ -70,7 +70,7 @@ Frontend
 
 The frontend is super simple and consists of a **MapView** and **RouteViews**. The interface is inspired by Uber and consists of a movable marker and clickable bus stops.
 
-The MapView does most of the heavy lifting in building out the initial page, geolocating, and finding nearby bus stops. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then connects to the **/stop_id** endpoint to try to map the place_id with a stop_id. If successful, a bus stop marker is added onto the map.
+The MapView does most of the heavy lifting in building out the initial page, geolocating, and finding nearby bus stops. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then fetches from the **/stop_id** endpoint to try to map the place_id with a stop_id. If successful, a bus stop marker is added onto the map.
 
 When a bus stop marker is clicked, a new RouteView is instantiated. The **RouteModel** attached to this view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
 
