@@ -7,7 +7,7 @@ Why realtime travel estimates?
 ---
 I chose to build out CloseBus for two main reasons:
 
-> 1) I wanted to become more familiar with geolocation and the capabilities of the Google Maps API's.
+> 1) Gain familiarity with geolocation and the capabilities of the Google Maps API's.
 
 > 2) The app would be immediately useful to myself and my peers!
 
