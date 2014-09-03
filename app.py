@@ -1,4 +1,4 @@
-from json import dumps
+from json import dumps, loads
 from flask import Flask 
 from flask.ext import restful
 from cache import cache_decorator
@@ -23,7 +23,7 @@ class StopID(restful.Resource):
         """
         data = get_stop_id(place_id, API_KEY)
         if data:
-            return dumps(data)
+            return loads(dumps(data))
         else:
             return {
                 'status': 400, 
