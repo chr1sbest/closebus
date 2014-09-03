@@ -21,7 +21,6 @@ class StopID(restful.Resource):
         Retrieve StopID using BeautifulSoup and Google Places API
         (or from redis cache).
         """
-        return {'hello': 'testing'}
         data = get_stop_id(place_id, API_KEY)
         if data:
             return dumps(data)
@@ -47,7 +46,6 @@ class Departures(restful.Resource):
                 'status': 400, 
                 'message': 'stop_id could not be found.'
             }
-        return dumps(data)
 
 api.add_resource(StopID, \
     '/api/v1/stop_id/<string:place_id>')
