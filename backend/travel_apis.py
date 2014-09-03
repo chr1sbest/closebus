@@ -55,7 +55,7 @@ class API_NextBus(AbstractAgency):
         json_obj = xmltodict.parse(response.content)
         busses = json_obj['body']['predictions']
         if type(busses) == list:    # Handle multiple values.
-            busses = filter(lambda x: x.get('direction', False), busses)
+            #busses = filter(lambda x: x.get('direction', False), busses)
             routes = map(lambda bus: bus.get('@routeTitle', None), busses)
             predictions = map(lambda bus: bus.get('direction', None), busses)
             return dict(zip(routes, predictions))
