@@ -24,6 +24,7 @@ def strategy_location_mapper(details):
     agencies = website_map.get(details['website'], [])
     place = normalize_address(details['name'])
     current = os.path.dirname(__file__)
+    print details
     for agency in agencies:
         path = os.path.join(current, 'LocationMaps', agency + '.json')
         with open(path) as data:
