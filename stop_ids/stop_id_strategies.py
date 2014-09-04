@@ -1,6 +1,30 @@
 import bs4
 import re
+import json
 from requests import get
+from bus_stops import website_map
+
+def strategy_location_mapper(details):
+    """
+    This strategy will map details['location'] to a list of routes
+    that contains details on stop_id's. 
+
+    **I believe these lists can be attained by reaching out to the
+      public transportation companies directly!**
+
+    The list of stops should be sorted and held on disk.
+    Once the stop_id has been retrieved once, it will be mapped 
+    accordingly and cached on redis.
+    """
+    try:    # TODO
+        agency = website_map.get(details['website'])
+        place = details['name']
+        with open('LocationMaps/{0}.txt'.format(agency) as data):
+            name_2_stop_id = json.loads(data)
+            details['stop_ids'] = name2_stop_id.get('name', None)
+    except:
+        details['stop_ids'] = "Unavailable"
+    return details
 
 def strategy_crawler(details):
     """
@@ -24,21 +48,3 @@ def strategy_crawler(details):
         details['stop_ids'] = "Unavailable"
     return details
 
-def strategy_location_mapper(details):
-    """
-    This strategy will map details['location'] to a list of routes
-    that contains details on stop_id's. 
-
-    **I believe these lists can be attained by reaching out to the
-      public transportation companies directly!**
-
-    The list of stops should be sorted and held on disk.
-    Once the stop_id has been retrieved once, it will be mapped 
-    accordingly and cached on redis.
-    """
-    try:    # TODO
-        pass
-    except:
-        pass
-    details['stop_ids'] = "Unavailable"
-    return details

@@ -53,13 +53,17 @@ class API_NextBus(AbstractAgency):
         Format XML response into JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
+        if json_obj['body'].has_key('Error'):
+            # Failure to retrieve information.
+            return {'No information available': None}
         busses = json_obj['body']['predictions']
-        if type(busses) == list:    # Handle multiple values.
-            #busses = filter(lambda x: x.get('direction', False), busses)
+        if type(busses) == list:
+            # Handle array of busses.
             routes = map(lambda bus: bus.get('@routeTitle', None), busses)
             predictions = map(lambda bus: bus.get('direction', None), busses)
             return dict(zip(routes, predictions))
-        else:                       # Handle single value.
+        else:                        
+            # Handle single bus.
             route = busses.get('@routeTitle', None)
             prediction = busses.get('direction', None)
             return {route: prediction}

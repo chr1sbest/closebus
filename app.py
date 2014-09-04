@@ -33,13 +33,7 @@ class Departures(restful.Resource):
         """
         transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
-        if data:
-            return dumps(data)
-        else:
-            return {
-                'status': 400, 
-                'message': 'stop_id could not be found.'
-            }
+        return dumps(data)
 
 api.add_resource(StopID, \
     '/api/v1/stop_id/<string:place_id>')
@@ -48,4 +42,4 @@ api.add_resource(Departures, \
     '/api/v1/departures/<string:agency>/<string:stop_id>')
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

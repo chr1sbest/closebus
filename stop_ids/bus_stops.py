@@ -11,7 +11,7 @@ def get_stop_id(place_id, key):
     # Get the details and url from Google Places API
     details = get_place_details(place_id, key)
     # Try each strategy to retrive stop_id details
-    strategies = [strategy_crawler, strategy_location_mapper]
+    strategies = [strategy_location_mapper, strategy_crawler]
     for strategy in strategies:
         details = strategy(details)
         # If strategy successful, stop_id's will be populated.
@@ -27,6 +27,14 @@ def get_place_details(place_id, key):
     api_url = 'https://maps.googleapis.com/maps/api/place/details/json'
     params = ({'placeid': place_id, 'key': key})
     r = get(api_url, params=params).json()
+    if r['status'] == 'INVALID_REQUEST':
+        return {
+            'place_id': place_id,
+            'name': None, 
+            'url': None, 
+            'agency': None,
+            'website': None
+        }
 
     # Use info gained from place_id query to map to transit agency.
     name = r['result']['name'] or None
