@@ -43,3 +43,8 @@ templates.website = "\
 <a target='_blank' href='<%= website %>' >Route Info</a>\
 ";
 
+//Template for navbar
+templates.navbar = "\
+<input id='pac-input' class='controls' type='text' placeholder='Search Box'>\
+";
+

@@ -34,27 +34,36 @@ var MapView = Backbone.View.extend({
       zoom: 17,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       center: latlng,
-      styles: mapStyles
+      styles: mapStyles,
+      panControl: false,
+      overviewMapControl: false,
+      mapTypeControl: false
     };
     this.map = new google.maps.Map(document.getElementById('map_canvas'),
       mapOptions);
 
+    this.buildNavbar();   // Build Navbar
     this.buildDraggable(latlng);  // Draggable center pointer
     this.buildCircle(latlng);     // Cirle around current location
     this.findNearbyStops(latlng); // API query to find nearby stops
   },
+  buildNavbar: function() {
+    // Build navbar.
+    this.NavbarView = new NavbarView({map: this.map, parent: this});
+    this.NavbarView.render()
+  },
   buildDraggable : function(latlng) {
     // Build a draggable icon at current location.
     var self = this;
-    var marker = new google.maps.Marker({
+    this.draggableMarker = new google.maps.Marker({
      position: latlng,
        map: this.map,
        draggable:true,
        title:""
     });
-    google.maps.event.addListener(marker, 'dragend', function(){
+    google.maps.event.addListener(this.draggableMarker, 'dragend', function(){
       // When icon is dragged to new location, reset circle and nearby stops.
-      var position = marker.getPosition();
+      var position = self.draggableMarker.getPosition();
       self.buildCircle(position);
       self.findNearbyStops(position);
       self.map.panTo(position);  
@@ -81,7 +90,7 @@ var MapView = Backbone.View.extend({
     var self = this;
     var request = {
       location: latlng,
-      radius: 200,
+      radius: 20,
       types: ['bus_station']
     };
     var nearby = new google.maps.places.PlacesService(this.map);
@@ -234,3 +243,28 @@ var WelcomeView = Backbone.Modal.extend({
   template: _.template(templates.welcome),
   cancelEl: '.bbm-button'
 });
+
+var NavbarView = Backbone.View.extend({
+  el: $("#navbar"),
+  content: templates.navbar,
+  initialize: function(options){
+    this.map = options.map;
+    this.parent = options.parent;
+    this.el.innerHTML = templates.navbar;
+    this.buildSearchBox();
+  },
+  buildSearchBox: function(){
+    var self = this;
+    var input = document.getElementById('pac-input');
+    this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+    var search = new google.maps.places.SearchBox(input);
+    google.maps.event.addListener(search, 'places_changed', function() {
+      var places = search.getPlaces();
+      var newLocation = places[0].geometry.location;
+      self.parent.draggableMarker.setPosition(newLocation);
+      self.parent.buildCircle(newLocation);     
+      self.parent.findNearbyStops(newLocation);
+      self.map.panTo(newLocation);
+    });
+  }
+})
