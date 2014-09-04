@@ -27,14 +27,12 @@ templates.welcome = " \
     <div class='bbm-modal__section'>\
       <p>Realtime arrival estimates on nearby busses!</p>\
       <ul>\
-        <li>Click on a bus for realtime arrival estimates via NextBus API.</li>\
-        <li>Drag the red marker to update your location.</li>\
-        <li>Help me grow! Feel free to play around -- as you explore, the app will learn new bus stops :)</li>\
+        <li>Click on a bus to get details.</li>\
+        <li>Help me grow! As you explore, the app will learn new bus stops :)</li>\
       </ul>\
     </div>\
     <div class='bbm-modal__bottombar'>\
-      <span style='float-left'>&copy; Chris Best 2014</span>\
-      <a href='#' class='bbm-button'>Close</a>\
+      <a href='#' class='bbm-button'>Ok</a>\
   </div>\
 ";
 
