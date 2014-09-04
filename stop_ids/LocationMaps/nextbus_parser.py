@@ -3,6 +3,17 @@ import bs4
 import sys
 from requests import get
 
+def get_all_agencies():
+    """
+    Get a list of all agency tags from NextBus.
+    """
+    url = 'http://webservices.nextbus.com/service/publicXMLFeed?command=agencyList'
+    r = get(url)
+    soup = bs4.BeautifulSoup(r.text)
+    agencies = soup.findAll('agency')
+    tags = map(lambda x: x['tag'], agencies)
+    return tags
+
 def build(agency):
     """
     Build JSON map of {Names: Numbers} and save into a file
@@ -12,14 +23,17 @@ def build(agency):
     r = get(url, params={'a': agency})
     soup = bs4.BeautifulSoup(r.text)
     rows = soup.findAll('tr')
-    name = map(lambda x: x.findAll('td')[0].text, rows)
-    numbers = map(lambda x: [x.findAll('td')[2].text], rows)
-    mapped = dict(zip(name, numbers))
-    json.dump(mapped, open(agency + '.json', 'w'))
+    unique_names = list(set(map(lambda x: x.findAll('td')[0].text, rows)))
+    unique_dict = {x: [] for x in unique_names}
+    for row in rows:
+        name = row.findAll('td')[0].text
+        number = row.findAll('td')[2].text
+        if number != '-':
+            unique_dict[name].append(number)
+    json.dump(unique_dict, open(agency + '.json', 'w'))
 
 if __name__ == '__main__' :
-    agency = sys.argv[1]
-    print 'Finding details on ' + agency
-    build(agency)
-    print 'File saved to ' + agency + '.json'
-
+    agencies = get_all_agencies()
+    for agency in agencies:
+        print 'Retrieving info on {0}.'.format(agency)
+        build(agency)
