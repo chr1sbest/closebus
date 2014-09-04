@@ -81,7 +81,7 @@ var MapView = Backbone.View.extend({
       zIndex: -2,
       map: this.map,
       center: latlng,
-      radius: 200
+      radius: 275
     }
     this.radius = new google.maps.Circle(circleOptions);
   },
@@ -90,7 +90,7 @@ var MapView = Backbone.View.extend({
     var self = this;
     var request = {
       location: latlng,
-      radius: 200,
+      radius: 250,
       types: ['bus_station']
     };
     var nearby = new google.maps.places.PlacesService(this.map);
