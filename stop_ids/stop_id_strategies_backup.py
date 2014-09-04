@@ -22,19 +22,17 @@ def strategy_location_mapper(details):
         agency = website_map.get(details['website'])
         place = details['name']
         current = os.path.dirname(__file__)
-        path = os.path.join(current, 'LocationMaps', agency + '.json')
+        path = os.path.join(current, 'LocationMaps', agency + '.txt')
         with open(path) as data:
             name_2_stop_id = json.load(data)
-            stop_ids = name_2_stop_id.get(place, "Unavailable")
-            details['stop_ids'] = stop_ids
-            print details
-        return details
+            stop_ids = name_2_stop_id.get(place)
+            details['stop_ids'] = [stop_ids]
     except:
         details['stop_ids'] = "Unavailable"
     return details
 
-
 def strategy_crawler(details):
+    #OBSOLETE STRATEGY. Will use this as a backup to location_mapper.
     """
     Scrape URL that corresponds with "place_id" to find bus_stop id.
 
