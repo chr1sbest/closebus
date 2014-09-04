@@ -78,7 +78,7 @@ var MapView = Backbone.View.extend({
       strokeWeight: 2,
       fillColor: '#FFFFFF',
       fillOpacity: 0.35,
-      zIndex: -2,
+      zIndex: -1000,
       map: this.map,
       center: latlng,
       radius: 275
@@ -117,7 +117,8 @@ var MapView = Backbone.View.extend({
       model.fetch({
         success: function(response) {
           // Only add markers for actransit, and berkeley shuttles. sf-muni next!
-          var agencies = ['actransit', 'berkeley', 'sf-muni'];
+          var agencies = ['actransit', 'berkeley', 'sf-muni', 'foothill', 'lametro',
+                          'lametro-rail', 'bronx', 'brooklyn', 'staten-island'];
           var icon_urls = {
             "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
             "http://www.actransit.org/": 'images/ac.png',
@@ -127,9 +128,9 @@ var MapView = Backbone.View.extend({
           if (agencies.indexOf(response.attributes.agency) >= 0 &&
           response.attributes.stop_ids !== 'Unavailable'){
             // Build stop if agency is supported and has stop_ids.
-            var color
+            var busColor = response.attributes.website;
             var busIcon = {
-              url: icon_urls[response.attributes.website],
+              url: icon_urls[busColor] || 'images/bus.png',
               scaledSize: new google.maps.Size(24, 32),
               origin: new google.maps.Point(0,0),
               anchor: new google.maps.Point(0, 0)

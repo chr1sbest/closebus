@@ -37,16 +37,15 @@ def get_place_details(place_id, key):
         }
 
     # Use info gained from place_id query to map to transit agency.
-    print r
     name = r['result']['name'] or None
     url = r['result']['url'] or None
     website = r['result']['website'] or None
-    agency = website_map.get(website, None)
+    agencies = website_map.get(website, None)
     return {
         'place_id': place_id,
         'name': name, 
         'url': url, 
-        'agency': agency,
+        'agency': agencies,
         'website': website,
         'stop_ids': "Unavailable"
     }
