@@ -15,7 +15,6 @@ def get_stop_id(place_id, key):
     for strategy in strategies:
         details = strategy(details)
         # If strategy successful, stop_id's will be populated.
-        print 'bus stops', details
         if details['stop_ids'] != "Unavailable":
             return details
     return False
@@ -38,6 +37,7 @@ def get_place_details(place_id, key):
         }
 
     # Use info gained from place_id query to map to transit agency.
+    print r
     name = r['result']['name'] or None
     url = r['result']['url'] or None
     website = r['result']['website'] or None

@@ -90,7 +90,7 @@ var MapView = Backbone.View.extend({
     var self = this;
     var request = {
       location: latlng,
-      radius: 20,
+      radius: 200,
       types: ['bus_station']
     };
     var nearby = new google.maps.places.PlacesService(this.map);
@@ -106,9 +106,9 @@ var MapView = Backbone.View.extend({
           })
           self.StopCollection.add(NewStopModel);
         })
-      };
       // Initialize the stop building methods.
       self.buildStops();
+      };
     })
   },
   buildStops : function() {
@@ -170,37 +170,46 @@ var MapView = Backbone.View.extend({
   getTimes: function(stop, infowindow){
     // Instantiate new route views and fetch route information
     var self = this;
-    var newRoute = new RouteView({
+    var newStop = new StopView({
       agency: stop.agency,
-      stop_id: stop.stop_ids[0],
+      stop_ids: stop.stop_ids,
       website: stop.website,
       infowindow: infowindow
     })
-    newRoute.model.fetch();
+    newStop.render();
   },
-  renderResponse: function(response){
-    _.each(response, function(value, key) {
-      var test = new RouteView({
-        title: value['@title'], 
-        predictions: value['prediction'],
-        parent: null
-      });
-    });
-  }
 });
 
 var StopView = Backbone.View.extend({
   // Parent view to hold children of RouteViews. Occasionally, a single
-  // stop will hold multiple stop_id's, this view structure should be
+  // stop will hold multiple stop_id's, this view architecture should be
   // flexibile enough to accomodate them.
   el: '#routes',
-  template: _.template(""),
+  websiteTemplate: _.template(templates.website),
   initialize: function(options){
-    this.children = options.children || null;
-    this.title = options.title || null;
+    var self = this;
+    this.agency = options.agency;
+    this.stop_ids = options.stop_ids;
+    this.website = options.website;
+    this.infowindow = options.infowindow;
+    this.children = options.children || [];
+    this.content = this.websiteTemplate(this)
+
+    _.each(this.stop_ids, function(stop_id){
+      var newRoute = new RouteView({
+        agency: self.agency,
+        stop_id: stop_id,
+        website: self.website,
+        infowindow: self.infowindow,
+        parent: self
+      });
+      newRoute.model.fetch();
+      self.children.push(newRoute);
+    })
   },
-  render: function(){
-    this.template
+  newContent: function(content) {
+    this.content = content + this.content;
+    this.infowindow.setContent(this.content);
   }
 })
 
@@ -208,9 +217,7 @@ var RouteView = Backbone.View.extend({
   // This view holds bus information on all the routes related to a stop.
   // Also holds a pointer to the infoWindow on the route. Asynchronously
   // updates "Loading..." to populate the window with realtime content.
-  el: $('#sup')[0],
   routeTemplate: _.template(templates.route),
-  websiteTemplate: _.template(templates.website),
   initialize: function(options){
     this.parent = options.parent;
     this.infowindow = options.infowindow;
@@ -225,17 +232,17 @@ var RouteView = Backbone.View.extend({
   },
   render: function(){
     var self = this;
-    var content = ""
     _.each(this.model.get('busses'), function(bus){
       // Add details for each route into content.
       var rendered = self.routeTemplate(bus);
-      content += rendered;
+      self.parent.newContent(rendered);
     });
-    // Add "Route Info" link at the bottom.
-    content += self.websiteTemplate(this.model.attributes);
-    this.infowindow.setContent(content);
     return this;
+  },
+  parse: function(){
+    this.render();
   }
+
 });
 
 var WelcomeView = Backbone.Modal.extend({

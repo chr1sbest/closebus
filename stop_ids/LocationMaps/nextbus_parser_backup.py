@@ -29,7 +29,7 @@ def build(agency):
         name = row.findAll('td')[0].text
         number = row.findAll('td')[2].text
         if number != '-':
-            unique_dict[name] = [number]   # change to plural!#TODO
+            unique_dict[name].append(number)
     json.dump(unique_dict, open(agency + '.json', 'w'))
 
 if __name__ == '__main__' :
@@ -37,4 +37,4 @@ if __name__ == '__main__' :
     #for agency in agencies:
         #print 'Retrieving info on {0}.'.format(agency)
         #build agency
-    build('actransit')
+    build('sf-muni')
