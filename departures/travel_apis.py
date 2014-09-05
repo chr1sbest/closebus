@@ -81,6 +81,7 @@ agency_map = {
     'actransit' : API_NextBus,
     'berkeley' : API_NextBus,
     'lametro' : API_NextBus,
+    'lametro-rail': API_NextBus,
     'foothill' : API_NextBus,
     'sf-muni': API_NextBus,
     'bronx': API_NextBus,

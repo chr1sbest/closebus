@@ -24,7 +24,7 @@ def strategy_location_mapper(details):
     current = os.path.dirname(__file__)
     print details
     for agency in agencies:
-        path = os.path.join(current, 'LocationMaps', agency + '.json')
+        path = os.path.join(current, 'NextBusData', agency + '.json')
         with open(path) as data:
             name_2_stop_id = json.load(data)
             stop_ids = name_2_stop_id.get(place, "Unavailable")

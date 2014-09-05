@@ -1,15 +1,9 @@
 Returns the stop_id's of failed searches.
-
 heroku logs | grep 'status=500' | grep -o -P '"/api/v1/stop_id/[a-zA-Z0-9_]*'
+
+Clears remote redis cache.
+redis://redistogo:7a267130a48f2fe95125cf968b530547@grouper.redistogo.com:10384/
 
 redis-cli -h grouper.redistogo.com -p 10384 -a 7a267130a48f2fe95125cf968b530547 flushall
 
-redis://redistogo:7a267130a48f2fe95125cf968b530547@grouper.redistogo.com:10384/
 
-SEE THIS TOMORROW!
-
--We have to make RouteView handle multiple stop ID's!
--We could use our StopView as a parent and hold data for the children
--StopView loops and passes all it's attributes + stop_id[i] down to a child
-    RouteView. In RouteView.parse(), tell it's parent StopView to re-render
-    and attach the content appropriately.

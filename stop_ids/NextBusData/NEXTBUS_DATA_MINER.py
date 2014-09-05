@@ -7,8 +7,9 @@ def get_all_agencies():
     """
     Get a list of all agency tags from NextBus.
     """
-    url = 'http://webservices.nextbus.com/service/publicXMLFeed?command=agencyList'
-    r = get(url)
+    url = 'http://webservices.nextbus.com/service/publicXMLFeed?'
+    params = {'command': 'agencyList'}
+    r = get(url, params=params)
     soup = bs4.BeautifulSoup(r.text)
     agencies = soup.findAll('agency')
     tags = map(lambda x: x['tag'], agencies)
