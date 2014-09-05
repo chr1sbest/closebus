@@ -88,7 +88,7 @@ The MapView does most of the heavy lifting by building out the initial page, geo
 
 When a bus stop marker is clicked, a new StopView is instantiated. This StopView instantiates a child RouteView for each stop_id it holds. The **RouteModel** attached to the RouteView view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
 
-While it's built to be responsive, there are still a few visual bugs on the mobile-end and the heavy client-side processes make the application sluggish.
+While it's built to be responsive, there are still a few visual bugs on the mobile-end and the heavy client-side processes make the application sluggish on smaller devices.
 
 Improvements
 ====
