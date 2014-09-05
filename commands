@@ -1,9 +1,0 @@
-Returns the stop_id's of failed searches.
-heroku logs | grep 'status=500' | grep -o -P '"/api/v1/stop_id/[a-zA-Z0-9_]*'
-
-Clears remote redis cache.
-redis://redistogo:7a267130a48f2fe95125cf968b530547@grouper.redistogo.com:10384/
-
-redis-cli -h grouper.redistogo.com -p 10384 -a 7a267130a48f2fe95125cf968b530547 flushall
-
-

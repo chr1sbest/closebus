@@ -29,7 +29,7 @@ def build(agency):
     for row in rows:
         name = row.findAll('td')[0].text
         number = row.findAll('td')[2].text
-        if number != '-':
+        if number != '-' and number not in unique_dict[name]:
             unique_dict[name].append(number)
     json.dump(unique_dict, open(agency + '.json', 'w'))
 

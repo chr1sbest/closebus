@@ -49,13 +49,12 @@ var RoutesModel = Backbone.Model.extend({
 var StopModel = Backbone.Model.extend({
   // Model that represents a bus stop and relevant details.
   urlRoot : '/api/v1/stop_id/',
-  defaults: {
-    id: null,
-    name: null,
-    stop_ids: null,
-    url: null,
-    website: null,
-    location: null
+  initialize: function(options){
+    this.id = options.id;
+    this.location = options.location;
+    this.name = options.name;
+    this.g_url = options.g_url;
+    this.website = options.website;
   }
 });
 

@@ -1,7 +1,7 @@
 var MapView = Backbone.View.extend({
   // This is the main application view. Handles geolocation, building
   // the google map, finding nearby stops, and then delegates to
-  // RouteViews for realtime information.
+  // StopViews/RouteViews for realtime information.
   el: $("#app"),
   initialize: function(){
     // Attempt to geolocalize user, then build Google Map accordingly.
@@ -42,13 +42,14 @@ var MapView = Backbone.View.extend({
     this.map = new google.maps.Map(document.getElementById('map_canvas'),
       mapOptions);
 
-    this.buildNavbar();   // Build Navbar
+    this.buildNavbar();           // Build Navbar
     this.buildDraggable(latlng);  // Draggable center pointer
     this.buildCircle(latlng);     // Cirle around current location
     this.findNearbyStops(latlng); // API query to find nearby stops
   },
   buildNavbar: function() {
-    // Build navbar.
+    // Build navbar. Contains reference to the map
+    // Extend later!
     this.NavbarView = new NavbarView({map: this.map, parent: this});
     this.NavbarView.render()
   },
@@ -86,77 +87,88 @@ var MapView = Backbone.View.extend({
     this.radius = new google.maps.Circle(circleOptions);
   },
   findNearbyStops : function(latlng) {
-    // Query Goole API for nearby bus_stations.
+    // Query Google Places API for any nearby ['bus_station']
     var self = this;
     var request = {
       location: latlng,
       radius: 250,
       types: ['bus_station']
     };
-    var nearby = new google.maps.places.PlacesService(this.map);
-    nearby.search(request, function(stops, status){
+    var GAPI = new google.maps.places.PlacesService(this.map);
+    GAPI.search(request, function(stops, status){
       if (status == google.maps.places.PlacesServiceStatus.OK){
         // Build new backbone StopCollection()
         self.StopCollection = new StopCollection();
         _.each(stops, function(stop) {
-          // Add each stop returned by GAPI to the StopCollection()
-          var NewStopModel = new StopModel({
-            id: stop.place_id,
-            location: stop.geometry.location
-          })
-          self.StopCollection.add(NewStopModel);
-        })
-      // Initialize the stop building methods.
-      self.buildStops();
-      };
-    })
+          // Request more info for each stop
+          var placeRequest = {placeId: stop.place_id};
+          GAPI.getDetails(placeRequest, function(place, status){
+            // Build models for each place returned by search.
+            var NewStopModel = new StopModel({
+              id: stop.place_id,
+              location: place.geometry.location,
+              name: place.name,
+              g_url: place.url,
+              website: place.website
+            })
+            self.buildStop(NewStopModel)
+            self.StopCollection.add(NewStopModel);
+          });
+        });
+      }
+    });
   },
-  buildStops : function() {
+  buildStop : function(model) {
     var self = this;
-    self.StopCollection.each(function(model){
-      model.fetch({
-        success: function(response) {
-          // Only add markers for actransit, and berkeley shuttles. sf-muni next!
-          var agencies = ['actransit', 'berkeley', 'sf-muni', 'foothill', 'lametro',
-                          'lametro-rail', 'bronx', 'brooklyn', 'staten-island'];
-          var icon_urls = {
-            "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
-            "http://www.actransit.org/": 'images/ac.png',
-            "http://www.sfmta.com/": 'images/muni.png',
-            "http://www.goldengate.org/": 'images/gold.png'
-          }
-          if (agencies.indexOf(response.attributes.agency) >= 0 &&
-          response.attributes.stop_ids !== 'Unavailable'){
-            // Build stop if agency is supported and has stop_ids.
-            var busColor = response.attributes.website;
-            var busIcon = {
-              url: icon_urls[busColor] || 'images/bus.png',
-              scaledSize: new google.maps.Size(24, 32),
-              origin: new google.maps.Point(0,0),
-              anchor: new google.maps.Point(0, 0)
-            }
-            var newStop = new google.maps.Marker({
-              //Build new marker on map
-              map: self.map,
-              position: response.attributes.location,
-              icon: busIcon,
-              zIndex: 1,
-              title: response.attributes.name,
-              stop_ids: response.attributes.stop_ids,
-              website: response.attributes.website,
-              agency: response.attributes.agency
-            });
-            google.maps.event.addListener(newStop, 'click', function() {
-              self.buildWindow(newStop)
-            });
-          }
-        },
-        error: function(response, error) {
-          // Handle fetch error to our API. Currently, the error is handled
-          // by simply not building the new stop marker on the map.
-          console.log(response, error);
+    var params = {
+      url: model.get('g_url'),
+      name: model.get('name'),
+      website: model.get('website'),
+      place_id: model.get('id')
+    }
+    model.fetch({
+      data: params,
+      success: function(response) {
+        // Only add markers for actransit, and berkeley shuttles. sf-muni next!
+        var agencies = ['actransit', 'berkeley', 'sf-muni', 'foothill', 'lametro',
+                        'lametro-rail', 'bronx', 'brooklyn', 'staten-island'];
+        var icon_urls = {
+          "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
+          "http://www.actransit.org/": 'images/ac.png',
+          "http://www.sfmta.com/": 'images/muni.png',
+          "http://www.goldengate.org/": 'images/gold.png'
         }
-      });
+        if (agencies.indexOf(response.attributes.agency) >= 0 &&
+        response.attributes.stop_ids !== 'Unavailable'){
+          // Build stop if agency is supported and has stop_ids.
+          var busColor = response.attributes.website;
+          var busIcon = {
+            url: icon_urls[busColor] || 'images/bus.png',
+            scaledSize: new google.maps.Size(24, 32),
+            origin: new google.maps.Point(0,0),
+            anchor: new google.maps.Point(0, 0)
+          }
+          var newStop = new google.maps.Marker({
+            //Build new marker on map
+            map: self.map,
+            position: response.attributes.location,
+            icon: busIcon,
+            zIndex: 1,
+            title: response.attributes.name,
+            stop_ids: response.attributes.stop_ids,
+            website: response.attributes.website,
+            agency: response.attributes.agency
+          });
+          google.maps.event.addListener(newStop, 'click', function() {
+            self.buildWindow(newStop)
+          });
+        }
+      },
+      error: function(response, error) {
+        // Handle fetch error to our API. Currently, the error is handled
+        // by simply not building the new stop marker on the map.
+        console.log(response, error);
+      }
     });
   },
   buildWindow: function(stop) {

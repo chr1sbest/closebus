@@ -19,11 +19,9 @@ def strategy_location_mapper(details):
     For each agency that the bus stop might fall under, load up the json
     data for the {stop_address: stop_id's} in an attempt to find stop_ids.
     """
-    agencies = website_map.get(details['website'], [])
     place = normalize_address(details['name'])
     current = os.path.dirname(__file__)
-    print details
-    for agency in agencies:
+    for agency in details['agency']:
         path = os.path.join(current, 'NextBusData', agency + '.json')
         with open(path) as data:
             name_2_stop_id = json.load(data)
