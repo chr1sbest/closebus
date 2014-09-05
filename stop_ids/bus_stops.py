@@ -1,55 +1,50 @@
 from requests import get
-from stop_id_strategies import strategy_crawler, strategy_location_mapper, website_map
+from stop_id_strategies import strategy_crawler, \
+        strategy_location_mapper, website_map
 
 def get_stop_id(place_id, key):
     """
-    Use multiple strategies to mine for "stop_id" that corresponds to
-    the specific place.
+    Use chain-of-command to mine for "stop_id" that corresponds 
+    to the specific place.
    
-    Default strategy is a crawler.
+    -Default strategy uses mined data held in json files.
+    -Backup strategy scrapes for data.
     """
-    # Get the details and url from Google Places API
+    chain_of_command = [strategy_location_mapper, strategy_crawler]
     details = get_place_details(place_id, key)
-    # Try each strategy to retrive stop_id details
-    strategies = [strategy_location_mapper, strategy_crawler]
-    for strategy in strategies:
+    if details['places_status'] != 'OK':
+        return {'message': "Failed Place Search", 'details': details}
+    for strategy in chain_of_command:
         details = strategy(details)
-        # If strategy successful, stop_id's will be populated.
+        # If strategy is successful, stop_id's will be populated.
         if details['stop_ids'] != "Unavailable":
             return details
-    return False
+    return {'message': "Failed to find stop_id's.", 'details': details}
 
 def get_place_details(place_id, key):
     """
-    Using "place_id", parse the JSON response for the URL.
+    Using the place_id, request more information from the Google Places
+    API. Parse and return the relevant details.
     """
+    response_template = {
+        'place_id': place_id,
+        'name': None, 
+        'url': None, 
+        'agency': None,
+        'website': None,
+        'places_status': None
+    }
     # Make query to Google Places API for details.
     api_url = 'https://maps.googleapis.com/maps/api/place/details/json'
     params = ({'placeid': place_id, 'key': key})
     r = get(api_url, params=params).json()
-    if r['status'] == 'INVALID_REQUEST':
-        return {
-            'place_id': place_id,
-            'name': None, 
-            'url': None, 
-            'agency': None,
-            'website': None
-        }
-
-    # Use info gained from place_id query to map to transit agency.
-    name = r['result']['name'] or None
-    url = r['result']['url'] or None
-    website = r['result']['website'] or None
-    agencies = website_map.get(website, None)
-    return {
-        'place_id': place_id,
-        'name': name, 
-        'url': url, 
-        'agency': agencies,
-        'website': website,
-        'stop_ids': "Unavailable"
-    }
-
-if __name__ == "__main__":
-    place_id = 'ChIJIzKCwid8hYARRAV-ixw4n68'
-    a = get_stop_id(place_id, key)
+    # Handle response
+    response_template['places_status'] = r['status']
+    if r['status'] != 'OK':
+        return response_template
+    # Overwrite with response information
+    response_template['name'] = r['result']['name'] or None
+    response_template['url'] = r['result']['url'] or None
+    response_template['website'] = r['result']['website'] or None
+    response_template['agency'] = website_map.get(website, None)
+    return response_template

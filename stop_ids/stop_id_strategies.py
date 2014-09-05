@@ -1,9 +1,8 @@
+import os
 import bs4
 import re
 import json
 from requests import get
-
-import os
 
 website_map = {
     'http://pt.berkeley.edu/around/transit/shuttles': ['actransit'],
@@ -17,9 +16,8 @@ website_map = {
 
 def strategy_location_mapper(details):
     """
-    This strategy opens text files that correspond to the agencies,
-    queries their dictionaries, and finds the corresponding [stop_ids] for 
-    the address.
+    For each agency that the bus stop might fall under, load up the json
+    data for the {stop_address: stop_id's} in an attempt to find stop_ids.
     """
     agencies = website_map.get(details['website'], [])
     place = normalize_address(details['name'])
@@ -39,13 +37,16 @@ def strategy_location_mapper(details):
 def normalize_address(address):
     """
     Normalize addresses so they can be appropriately searched for against
-    the NextBus data set.
+    the NextBus data set. Many inconsistencies exist throughout the Nation.
 
     i.e. 'Park Row/Ann St' -> 'Park Row & Ann St'
     """
-    # Fix '/' -> ' & '
+    # Fix 'Place/Place' -> 'Place & Place'
     if re.findall('[a-zA-Z0-9]/[a-zA-Z0-9]', address):
         address = address.replace('/', ' & ')
+    # Fix 'Place:Place' -> 'Place & Place'
+    if re.findall('[a-zA-Z0-9]:[a-zA-Z0-9]', address):
+        address = address.replace(':', ' & ')
     # Fix 'RD' -> 'Rd' & 'PK' -> 'Pk'
     if re.findall('[PR][KD]', address):
         address = re.sub('([PR][KD])', \
@@ -60,10 +61,10 @@ def normalize_address(address):
     # Fix '151 St' -> '151st St'
     if re.findall('[0-9][\ ][SA][tv]', address):
         address = re.sub(r'[0-9]+', \
-                numerical_ordering, address)
+                ordinal_conversion, address)
     return address
 
-def numerical_ordering(value):
+def ordinal_conversion(value):
     """
     Helper function to format numbered streets properly.
 
@@ -83,10 +84,8 @@ def strategy_crawler(details):
     """
     Scrape URL that corresponds with "place_id" to find bus_stop id.
 
-    Google Places unfortunately does not return stop_id, a vital
-    component for our realtime NextBus query. Fortunately, they do give
-    us details for a URL which maps to a page that contains details on
-    "stop_id"!
+    If the mapper fails, this strategy scrapes information from the
+    URL page to find the STOP ID's.
     """
     try:
         r = get(details['url'])

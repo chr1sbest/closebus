@@ -18,8 +18,7 @@ class StopID(restful.Resource):
     @cache_decorator(expire=False)
     def get(self, place_id):
         """
-        Retrieve StopID using BeautifulSoup and Google Places API
-        (or from redis cache).
+        Retrieve stop_id's that correspond to place_id. Cache results.
         """
         data = get_stop_id(place_id, API_KEY)
         return dumps(data)
@@ -28,8 +27,7 @@ class Departures(restful.Resource):
     @cache_decorator(expire=True, ttl_seconds=60)
     def get(self, agency, stop_id):
         """
-        Retrieve realtime departure data from proper agency 
-        (or from redis cache).
+        Retrieve realtime departure data from appropriate agency.
         """
         transport_api = agency_map[agency]()       # Determine agency API
         data = transport_api.get(agency, stop_id)  # Request new data
@@ -42,4 +40,4 @@ api.add_resource(Departures, \
     '/api/v1/departures/<string:agency>/<string:stop_id>')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
