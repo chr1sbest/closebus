@@ -48,8 +48,6 @@ var MapView = Backbone.View.extend({
     this.findNearbyStops(latlng); // API query to find nearby stops
   },
   buildNavbar: function() {
-    // Build navbar. Contains reference to the map
-    // Extend later!
     this.NavbarView = new NavbarView({map: this.map, parent: this});
     this.NavbarView.render()
   },

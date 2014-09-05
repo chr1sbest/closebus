@@ -55,7 +55,7 @@ class API_NextBus(AbstractAgency):
         json_obj = xmltodict.parse(response.content)
         if json_obj['body'].has_key('Error'):
             # Failure to retrieve information.
-            return {'No information available': None}
+            return {'No information available for this stop.': None}
         busses = json_obj['body']['predictions']
         if type(busses) == list:
             # Handle array of busses.

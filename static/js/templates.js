@@ -28,7 +28,12 @@ templates.welcome = " \
       <p>Realtime arrival estimates on nearby busses!</p>\
       <ul>\
         <li>Click on a bus to get details.</li>\
-        <li>Help me grow! As you explore, the app will learn new bus stops :)</li>\
+        <li>Currently supporting transit agencies in: <br>\
+             - San Francisco  <br>\
+             - East Bay  <br>\
+             - Metropolitan Los Angeles  <br>\
+             - Metropolitan New York City  <br>\
+        </li>\
       </ul>\
     </div>\
     <div class='bbm-modal__bottombar'>\
