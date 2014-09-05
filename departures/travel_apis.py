@@ -69,7 +69,18 @@ class API_NextBus(AbstractAgency):
             return {route: prediction}
 
 class API_BART(AbstractAgency): #TODO
-    pass
+    def __init__(self):
+        self.api_url = 'http://api.bart.gov/api/etd.aspx'
+        self.params = {'cmd': 'etd'}
+
+    def set_params(self, stop):
+        pass
+
+    def parse(self, response):
+        json_obj = xmltodict.parse(response.content)
+        trains = json_obj['root']['station']['etd']
+
+
 
 class API_GreyHound(AbstractAgency):
     pass
