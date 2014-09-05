@@ -125,7 +125,7 @@ If the user is in a location with mulitple new bus stops, there is a consecutive
 
 **Better Data**
 
-I've made most of my design decisions on gut instinct. Ideally, I'd like to employ a simple A/B testing framework for the frontend to collect usage data. It would also be beneficial for me to build tools to measure processes on the backend to optimize accordingly.
+I've made most of my design decisions on gut instinct. Ideally, I'd like to employ a simple A/B testing framework for the frontend to collect usage data. It would also be beneficial for me to build tools to measure processes on the backend and optimize accordingly.
 
 Final Thoughts
 =========
