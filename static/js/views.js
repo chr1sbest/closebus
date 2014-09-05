@@ -6,6 +6,7 @@ var MapView = Backbone.View.extend({
   initialize: function(){
     // Attempt to geolocalize user, then build Google Map accordingly.
     var self = this;
+    var currentWindow = null;
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(success, fail);
     }
@@ -175,7 +176,11 @@ var MapView = Backbone.View.extend({
     var infowindow = new google.maps.InfoWindow({
         content: "Loading.."
     });
+    if (self.currentWindow){
+      self.currentWindow.close();
+    }
     infowindow.open(self.map, stop);
+    self.currentWindow = infowindow;
     self.getTimes(stop, infowindow);
   },
   getTimes: function(stop, infowindow){
