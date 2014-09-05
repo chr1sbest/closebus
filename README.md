@@ -11,26 +11,35 @@ I chose to build out CloseBus for two main reasons:
 
 > 2) The app would be immediately useful to myself and my peers!
 
+
+Current Status
+---
+- The application is deployed and capable of holding real-time data for up to 6,000 bus stops at a time.
+- There is near complete coverage in SF & East Bay, but the coverage in New York City and Los Angeles is mostly restricted to the densely populated areas (Downtown LA, Bronx, Brooklyn, Staten Island.)
+- While the application is functional on mobile devices, the application has been optimized for non-mobile usage.
+
 Technical Stack Overview
 ---
-I chose to split my time evenly between the frontend and backend as a **full-stack** engineer. The full stack includes a RESTful interface built on Python **Flask**, front end single-page app built with **Backbone.js**, and a **Redis** cache. The application is currently deployed to **Heroku** on http://closebus.herokuapp.com.
+I chose to split my time evenly between the frontend and backend as a **full-stack** engineer. The full stack includes a RESTful interface built on Python **Flask** with a **Redis** cache, and a frontend single-page app built with **Backbone.js**. The application is currently deployed to **Heroku** on http://closebus.herokuapp.com.
 
-I chose **Flask** because it is incredibly lightweight and easy to quickly prototype API's and applications in general. Unfortunately, running on CPython, I'm not able to effectively use multi-threading due to the GIL. Flask is my framework of choice for building small projects.
+I chose **Flask** because it is lightweight and easy to quickly prototype API's and general applications. Unfortunately, running on CPython, I'm not able to effectively utilize multi-threading due to the GIL. Flask is my framework of choice for building small projects.
 
-**Backbone.js** was similiarly chosen due its simplicity and due to it being lighter than other front end frameworks. I have been looking forward to learning Angular.js in a new project, but I felt this might not be the time and place.
+**Backbone.js** was similiarly chosen due its simplicity and flexibility. I have been looking forward to learning Angular.js in a new project, but I felt this might not be the time and place.
 
-As most of the data is realtime travel information, there is little reason to write anything to disk. I chose to use **Redis** as a cache to prevent duplicate calls to third party API's (and stay under the rate limit), cache results of web crawling for stop_id's to prevent from having to crawl multiple times, and to give quicker response times to users!
+As most of the data is realtime travel information, there is little reason to write anything to disk. I chose to use **Redis** as a cache to prevent duplicate calls to third party API's (and stay under the rate limit) and to have lower latency for users.
 
-It's super quick and easy (and **free**!) to deploy to **Heroku.**
+I chose to deploy to **Heroku** due to the ease of deployment and cost (free!)
 
 Backend
 ====
 
-The backend consists of three main steps
+The backend consists of four main components.
 
-> 1) Finding nearby stop_id's using Google Maps API.
+> 1) Finding nearby bus stops.
 
-> 2) Querying travel API's for realtime travel estimates using the stop_id.
+> 2) Finding the corresponding **stop_id** for each stop.
+
+> 2) Using the stop_id to query travel API's for realtime travel estimates.
 
 > 3) Caching results.
 
@@ -39,11 +48,16 @@ Nearby Stops
 
 The **/stop_id** endpoint mainly serves as an adapter to the Google Places API.
 
-I chose to implement the chain of responsibility pattern in this attempt to find stop_id's. Currently, the only strategy is to crawl the Google Places URL (strategy details below), but the app is built to successively try strategies until a stop_id is returned. The app lazily finds new stops (in a radius of the user's marker location) and caches them.
+The frontend picks up **place_id**s for nearby locations and then queries */stop_id/place_id* for each location. This API endpoint simply formats the request to the Google Places API, handles errors, and returns the updated information to the frontend.
 
-**Crawl Strategy** - Currently, the Google Places API doesn't offer the vital piece of information I need (stop_id), so I had to hack my way around it. The places API returns a URL --> this URL contains information on stop_id in a specific div. Using BeautifulSoup and a little regex, I was able to pull out the stop_ids. This strategy is reliant on companies uploading stop_ids to Google (not always the case!) and reliant on a few more get requests that I'd like. It's not ideal, but it currently gets the job done.
 
-I'm certain that the transit agencies have better data I could use to be able to map some value from the Google Places API directly to a stop_id. In the future, I would look into gaining the official data and use the web crawling as a backup strategy.
+Finding the corresponding stop_id for each stop.
+----
+This was the most challenging and by far the most fun component to work on. The Google Places API doesn't explicity return information on the *stop_id*. However, I was able to manage to find *two* ways around it. Unfortunately, neither method is foolproof, so I decided to employ the chain of command design pattern in an attempt to catch as much as I could.
+
+After unsuccessfully looking for ways to get my hands on official data, I started to doubt the feasability of the project. I played around with the data that was available to me, and I ended up finding something of interest! The GAPI data returned a specific url for each place. This url mapped to a page which, at the very very bottom (in small grey letters), listed Stop ID's. It was terribly inconsistent, but it was something. I wrote a crawler to parse out the data I needed and implemented this time-consuming process to be cached and lazy.
+
+I wasn't too happy with the inconsistencies, but this was the best I could do.. Or so I thought! I luckily stumbled onto some data that mapped cross streets to stop_ids and I wrote a little script to extract it. Unfortunately, each agency that uploads data to Google Maps does so in a different way -- very few of these values mapped to anything in my data. Regex to the rescue! I wrote out a huge block of regex.finds() and regex.subs() that takes care of the majority of inconsistencies. Shoutout to this [Python Regex helper!](https://pythex.org/) The latency isn't anywhere near as bad as the previous crawler strategy, but I still cache these results so that I don't have to read from disk.
 
 Querying Travel API's
 -----
@@ -59,25 +73,27 @@ Caching
 
 Realtime data is cached on a 60 second TTL. {Place: stop_id} is cached ~permanently.
 
-NextBus will rate limit me at 2mb/20s. With each request around 1kb, making 100 requests a second for 20 seconds would get me rate limited. With requests cached on a 60s TTL, I could prevent duplicate requests for realtime travel estimates of a specific stop and theoretically maintain information on a minimum of 2,000 different stops at a time and a maximum of 6,000. 
+NextBus will rate limit me at 2mb/20s. With each request around 1kb, making 100 requests a second for 20 seconds would get me rate limited. With requests cached on a 60s TTL, not only do I prevent duplicate requests for realtime travel estimates of a specific stop, but I can theoretically maintain information on a maximum of 6,000 bus stops at a time. 
 
-Mapping places to stop_id's is currently a big hassle (**see crawler strategy**), and I felt that it was best to cache these as well. The first time a bus stop is in a user's vicinity, the crawling strategy is executed. The next time any user is in vicinity of the bus stop, the stop_id will be returned immediately from the cache. As a side effect, this *feature* could encourage users to explore and play with the app to find new stops!
+The mapping of place_id's to stop_id's is cached so that the application doesn't need to go through all the hassle every time a user is within a known stop's vicinity.
 
 The cache is written as a decorator that I can easily throw onto RESTful methods (yay Python!)
 
 Frontend
 =====
 
-The frontend is super simple and consists of a **MapView** and **RouteViews**. The interface is inspired by Uber and consists of a movable marker and clickable bus stops.
+The frontend consists of a **MapView** and **StopViews** that contain **RouteViews**. The interface is inspired by Uber and consists of a movable marker and clickable bus stops.
 
-The MapView does most of the heavy lifting in building out the initial page, geolocating, and finding nearby bus stops. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then fetches from the **/stop_id** endpoint to try to map the place_id with a stop_id. If successful, a bus stop marker is added onto the map.
+The MapView does most of the heavy lifting by building out the initial page, geolocating, and finding nearby bus stops via Google Places API. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then fetches from the **/stop_id** endpoint to attempt to retrieve stop_id details. If successful, a bus stop marker is added onto the map.
 
-When a bus stop marker is clicked, a new RouteView is instantiated. The **RouteModel** attached to this view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
+When a bus stop marker is clicked, a new StopView is instantiated. This StopView instantiates a child RouteView for each stop_id it holds. The **RouteModel** attached to the RouteView view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
+
+While it's built to be responsive, there are still a few visual bugs on the mobile-end and the heavy client-side processes make the application sluggish.
 
 Improvements
 ====
 
-There are five main improvements I will be working on in the next week.
+There are five main improvements I want to make in the near-future.
 
 > 1) Better automated testing.
 
@@ -87,31 +103,33 @@ There are five main improvements I will be working on in the next week.
 
 > 4) Asynchronous requests to third-party API's.
 
-> 5) Better data from transit agencies.
+> 5) Analytics.
 
 **Automated Testing**
 
 Due to not being familiar with the capabilities of Google Maps, my process on the frontend consisted mostly of hacking. Had I been more familiar of what I was capable of, I could have written better tests to accompany my code.
 
-Admittedly, testing is where I need the most help. I have felt the pain of refactoring larger apps without proper test coverage, and I don't want to feel it again. I will be spending the next few days focused on writing unit tests for my Javascript frontend and improving my tests on my Flask backend. My process on this app was more of DDT than TDD :\
+Admittedly, testing is where I need the most help. I have felt the pain of refactoring larger apps without proper test coverage, and I don't want to feel it again. I will be spending the next few days focused on writing unit tests for my Javascript frontend and improving my tests on my Flask backend. It's not something I'm proud of, but my process on this app was more of DDT than TDD :\
 
 **Displaying Data**
 
-It currently isn't as mobile-friendly as I would like it to be. I would like to try using a tabbed modal popup to display bus stop information.
+It currently isn't as mobile-friendly as I would like it to be. I would like to experiment with using a tabbed modal popup to display bus stop information.
 
 **More Agencies**
 
-The backend is built to extend and incorporate new agencies with ease, so why not? I have shown a few friends my app, but it only currently works in Berkeley/Oakland!
+The backend is built to extend and incorporate new agencies with ease, so why not?
 
 **Asynchronous Requests**
 
-If the user is in a location with mulitple new bus stop, there is a consecutive series of long requests that need to take place before stop times can be registered. It should be beneficial to handle these asynchronously.
+If the user is in a location with mulitple new bus stops, there is a consecutive series of long requests that need to take place before stop times can be registered. It should be beneficial to handle these asynchronously.
 
 **Better Data**
 
-I will show my app prototype to NextBus and see if they will give me better data so that I don't have to crawl for stop_ids.
+I've made most of my design decisions on gut instinct. Ideally, I'd like to employ a simple A/B testing framework for the frontend to collect usage data. It would also be beneficial for me to build tools to measure processes on the backend to optimize accordingly.
 
 Final Thoughts
 =========
 
 I had a lot of fun building this app and I've learned a ton. There is a lot left to implement, but I'm happy with the progress I've made so far!
+
+If people can find use from the app, I would look into building native mobile applications to communicate with my API and offer a much slicker UI/UX.
