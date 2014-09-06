@@ -9,6 +9,11 @@ def get_stop_id(details):
     -Default strategy uses mined data held in json files.
     -Backup strategy scrapes for data.
     """
+    # Check if all parameters exist.
+    details['stop_ids'] = "Unavailable"
+    if not details['url'] or not details['name']:
+        return {'message': 'Incomplete parameters', 'details': details}
+    # Execute chain of command to find details.
     chain_of_command = [strategy_location_mapper, strategy_crawler]
     for strategy in chain_of_command:
         details = strategy(details)
