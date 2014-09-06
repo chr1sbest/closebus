@@ -25,7 +25,7 @@ templates.welcome = " \
       <h3 class='bbm-modal__title'>CloseBus</h3> \
     </div>\
     <div class='bbm-modal__section'>\
-      <p>Realtime arrival estimates on nearby busses!</p>\
+      <p>Realtime arrival estimates on nearby buses!</p>\
       <ul>\
         <li>Click on a bus to get details.</li>\
         <li>Currently supporting transit agencies in: <br>\
