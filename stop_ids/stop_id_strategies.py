@@ -40,24 +40,24 @@ def normalize_address(address):
     i.e. 'Park Row/Ann St' -> 'Park Row & Ann St'
     """
     # Fix 'Place/Place' -> 'Place & Place'
-    if re.findall('[a-zA-Z0-9]/[a-zA-Z0-9]', address):
+    if re.findall(r'[a-zA-Z0-9]/[a-zA-Z0-9]', address):
         address = address.replace('/', ' & ')
     # Fix 'Place:Place' -> 'Place & Place'
-    if re.findall('[a-zA-Z0-9]:[a-zA-Z0-9]', address):
+    if re.findall(r'[a-zA-Z0-9]:[a-zA-Z0-9]', address):
         address = address.replace(':', ' & ')
     # Fix 'RD' -> 'Rd' & 'PK' -> 'Pk'
-    if re.findall('[PR][KD]', address):
-        address = re.sub('([PR][KD])', \
-                lambda x: x.group(0).title(), address)
+    if re.findall(r'[PRSA][KDTV]', address):
+        address = re.sub(r'([PRSA][KDTV])', \
+            lambda x: x.group(0).title(), address)
     # Fix 'Bl' -> 'Blvd'
-    if re.findall('(Bl)[\ ]', address):
+    if re.findall(r'(Bl)[\ ]', address):
         address = address.replace('Bl', 'Blvd')
     # Fix 'w 156th' -> 'W 156th'
-    if re.findall('[^a-zA-Z][wnse][/ ]', address):
-        address = re.sub('[^a-zA-Z]([wnse])[/ ]', \
-                lambda x: x.group(0).upper(), address)
+    if re.findall(r'[^a-zA-Z][wnse][/ ]', address):
+        address = re.sub(r'[^a-zA-Z]([wnse])[/ ]', \
+            lambda x: x.group(0).upper(), address)
     # Fix '151 St' -> '151st St'
-    if re.findall('[0-9][\ ][SA][tv]', address):
+    if re.findall(r'[0-9][\ ][SA][tv]', address):
         address = re.sub(r'[0-9]+', \
                 ordinal_conversion, address)
     return address
@@ -86,11 +86,11 @@ def strategy_crawler(details):
     URL page to find the STOP ID's.
     """
     try:
-        r = get(details['url'])
-        soup = bs4.BeautifulSoup(r.text)
+        response = get(details['url'])
+        soup = bs4.BeautifulSoup(response.text)
         # Regex any div with class 'tppjsc' for a stop_id number
         stop_divs = soup.select('div.tppjsc')
-        stop_ids = map(lambda div: re.findall('(\d+)', div.text), stop_divs)
+        stop_ids = [re.findall(r'(\d+)', div.text) for div in stop_divs]
         stop_ids = reduce(lambda x, y: x + y, stop_ids)
         details['stop_ids'] = list(set(stop_ids))   # Remove duplicates
         if details['stop_ids'] != 'Unavailable':

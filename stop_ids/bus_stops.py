@@ -1,13 +1,14 @@
 from requests import get
-from stop_id_strategies import strategy_crawler, strategy_location_mapper
+from stop_ids.stop_id_strategies \
+    import strategy_crawler, strategy_location_mapper
 
 def get_stop_id(details):
     """
-    Use chain-of-command to mine for "stop_id" that corresponds 
+    Use chain-of-command to mine for "stop_id" that corresponds
     to the specific place.
-   
-    -Default strategy uses mined data held in json files.
-    -Backup strategy scrapes for data.
+
+    - Default strategy uses mined data held in json files.
+    - Backup strategy scrapes for data.
     """
     # Check if all parameters exist.
     details['stop_ids'] = "Unavailable"
