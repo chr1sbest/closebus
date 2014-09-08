@@ -5,13 +5,20 @@ import json
 from requests import get
 
 website_map = {
-    'http://pt.berkeley.edu/around/transit/shuttles': ['actransit'],
-    'http://www.actransit.org/': ['actransit'],
-    'http://www.sfmta.com/': ['sf-muni'],
-    'http://www.goldengate.org/': ['sf-muni'],
-    'http://www.metro.net/': ['lametro', 'lametro-rail'],
-    'http://www.foothilltransit.org/': ['foothill'],
-    'http://www.mta.info/': ['bronx', 'brooklyn', 'staten-island']
+    'http://pt.berkeley.edu/around/transit/shuttles': \
+            ['actransit'],
+    'http://www.actransit.org/': \
+            ['actransit'],
+    'http://www.sfmta.com/': \
+            ['sf-muni'], 
+    'http://www.goldengate.org/': \
+            ['sf-muni'],
+    'http://www.metro.net/': \
+            ['lametro', 'lametro-rail'],
+    'http://www.foothilltransit.org/': \
+            ['foothill'],
+    'http://www.mta.info/': \
+            ['bronx', 'brooklyn', 'staten-island']
 }
 
 def strategy_location_mapper(details):
@@ -48,14 +55,14 @@ def normalize_address(address):
     # Fix 'RD' -> 'Rd' & 'PK' -> 'Pk'
     if re.findall('[PR][KD]', address):
         address = re.sub('([PR][KD])', \
-                lambda x: x.group(0).title(), address)
+            lambda x: x.group(0).title(), address)
     # Fix 'Bl' -> 'Blvd'
     if re.findall('(Bl)[\ ]', address):
         address = address.replace('Bl', 'Blvd')
     # Fix 'w 156th' -> 'W 156th'
     if re.findall('[^a-zA-Z][wnse][/ ]', address):
         address = re.sub('[^a-zA-Z]([wnse])[/ ]', \
-                lambda x: x.group(0).upper(), address)
+            lambda x: x.group(0).upper(), address)
     # Fix '151 St' -> '151st St'
     if re.findall('[0-9][\ ][SA][tv]', address):
         address = re.sub(r'[0-9]+', \
@@ -100,3 +107,18 @@ def strategy_crawler(details):
         details['stop_ids'] = "Unavailable"
     return details
 
+def strategy_extras(details):
+    """
+    Query against the manual __extras.json dataset. Similar to 
+    strategy_location_mapper but no normalization of address.
+    """
+    place = details['name']
+    current = os.path.dirname(__file__)
+    path = os.path.join(current, 'NextBusData', '__extras.json')
+    with open(path) as data:
+        name_2_stop_id = json.load(data)
+        stop_ids = name_2_stop_id.get(place, "Unavailable")
+        if stop_ids != "Unavailable":
+            details['stop_ids'] = stop_ids
+            details['agency'] = details['agency'][0]
+    return details
