@@ -1,5 +1,5 @@
 from json import dumps
-from flask import Flask 
+from flask import Flask
 from flask.ext.restful import Api, Resource, reqparse
 from redis_cache import cache_decorator
 from departures.travel_apis import agency_map
@@ -18,7 +18,7 @@ class StopID(Resource):
     @cache_decorator(expire=False)
     def get(self, place_id):
         """
-        Retrieve stop_id's that correspond to place_id. Cache results.
+        Retrieve stop_id information given details of a Google Place.
         """
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=str)

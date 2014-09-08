@@ -1,8 +1,18 @@
 import xmltodict
-import json
 from requests import get as rget
 
 class AbstractAgency(object):
+    """
+    Base class for all agency API's to inherit from. Each API must have
+    methods to get, set_parameters, and transform the result into JSON.
+    """
+    def __init__(self):
+        """
+        Each agency needs an api_url and URL params.
+        """
+        self.api_url = ""
+        self.params = {}
+
     def get(self, agency, stop_id):
         """
         Submit GET request to agency -> then parse and transform
@@ -18,7 +28,7 @@ class AbstractAgency(object):
         Implement appropriately in subclass.
         """
         raise NotImplementedError
-    
+
     def transform(self):
         """
         Each Agency API returns different data formats. Need to parse and
@@ -39,64 +49,75 @@ class AbstractAgency(object):
         """
         raise NotImplementedError
 
-class API_NextBus(AbstractAgency):
+class NextBus(AbstractAgency):
+    """
+    Contains methods to communicate and parse the NextBus API.
+    """
     def __init__(self):
-        self.api_url = 'http://webservices.nextbus.com/service/publicXMLFeed'
+        url = 'http://webservices.nextbus.com/service/publicXMLFeed'
+        self.api_url = url
         self.params = {'command': 'predictions'}
 
     def set_params(self, agency, stop_id):
+        """
+        NextBus takes agency and stop_id as parameters.
+        """
         self.params['a'] = agency
-        self.params['stopId'] =  stop_id
+        self.params['stopId'] = stop_id
 
     def transform(self, response):
-        """ 
-        Format XML response into JSON object with correct info.
+        """
+        The NextBus API returns XML. Format XML response into a
+        JSON object with correct info.
         """
         json_obj = xmltodict.parse(response.content)
-        if json_obj['body'].has_key('Error'):
-            # Failure to retrieve information.
-            return {'No information available': None}
+        if json_obj['body'].has_key('Error'):   # NextBus API Error.
+            return {'No information available for this stop.': None}
         busses = json_obj['body']['predictions']
-        if type(busses) == list:
-            # Handle array of busses.
-            routes = map(lambda bus: bus.get('@routeTitle', None), busses)
-            predictions = map(lambda bus: bus.get('direction', None), busses)
+        if type(busses) == list:                # Handle list of busses.
+            routes = [bus.get('@routeTitle', None) for bus in busses]
+            predictions = [bus.get('direction', None) for bus in busses]
             return dict(zip(routes, predictions))
-        else:                        
-            # Handle single bus.
+        else:                                   # Handle single bus
             route = busses.get('@routeTitle', None)
             prediction = busses.get('direction', None)
             return {route: prediction}
 
-class API_BART(AbstractAgency): #TODO
+
+class BART(AbstractAgency):
+    """
+    Contains methods to communicate with and parse data from the BART
+    ETD API.
+    """
     def __init__(self):
         self.api_url = 'http://api.bart.gov/api/etd.aspx'
         self.params = {'cmd': 'etd'}
 
     def set_params(self, stop):
-        pass
+        """
+        BART only requires a stop key.
+        """
+        self.params['stop'] = stop
 
-    def parse(self, response):
-        json_obj = xmltodict.parse(response.content)
+    def transform(self, response):
+        """
+        The BART API return XML. Format the XML response into a
+        JSON object with correct info.
+        """
+        json_obj = xmltodict.parse(response.content)    #TODO
         trains = json_obj['root']['station']['etd']
+        return trains
 
-
-
-class API_GreyHound(AbstractAgency):
-    pass
-
-class API_CalTrain(AbstractAgency):
-    pass
 
 agency_map = {
-    'actransit' : API_NextBus,
-    'berkeley' : API_NextBus,
-    'lametro' : API_NextBus,
-    'lametro-rail': API_NextBus,
-    'foothill' : API_NextBus,
-    'sf-muni': API_NextBus,
-    'bronx': API_NextBus,
-    'brooklyn': API_NextBus,
-    'staten-island': API_NextBus,
-    'BART' : API_BART
+    'actransit' : NextBus,
+    'berkeley' : NextBus,
+    'lametro' : NextBus,
+    'lametro-rail': NextBus,
+    'foothill' : NextBus,
+    'sf-muni': NextBus,
+    'bronx': NextBus,
+    'brooklyn': NextBus,
+    'staten-island': NextBus,
+    'BART' : BART
 }

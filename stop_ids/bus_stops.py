@@ -4,7 +4,7 @@ from stop_id_strategies import \
 
 def get_stop_id(details):
     """
-    Use chain-of-command to mine for "stop_id" that corresponds 
+    Use chain-of-command to mine for "stop_id" that corresponds
     to the specific place.
    
     - Default strategy uses mined data held in json files.

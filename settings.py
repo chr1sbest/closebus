@@ -1,5 +1,4 @@
 import os
-import urlparse
 
 API_KEY = os.environ.get('API_KEY', None)
 

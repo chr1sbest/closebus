@@ -1,6 +1,5 @@
 import json
 import bs4
-import sys
 from requests import get
 
 def get_all_agencies():
@@ -9,10 +8,10 @@ def get_all_agencies():
     """
     url = 'http://webservices.nextbus.com/service/publicXMLFeed?'
     params = {'command': 'agencyList'}
-    r = get(url, params=params)
-    soup = bs4.BeautifulSoup(r.text)
+    response = get(url, params=params)
+    soup = bs4.BeautifulSoup(response.text)
     agencies = soup.findAll('agency')
-    tags = map(lambda x: x['tag'], agencies)
+    tags = [x['tag'] for x in agencies]
     return tags
 
 def build(agency):
@@ -21,10 +20,10 @@ def build(agency):
     titled (agency).txt
     """
     url = 'http://www.nextbus.com/wirelessConfig/stopNumbers.jsp'
-    r = get(url, params={'a': agency})
-    soup = bs4.BeautifulSoup(r.text)
+    response = get(url, params={'a': agency})
+    soup = bs4.BeautifulSoup(response.text)
     rows = soup.findAll('tr')
-    unique_names = list(set(map(lambda x: x.findAll('td')[0].text, rows)))
+    unique_names = list(set([x.findAll('td')[0].text for x in rows]))
     unique_dict = {x: [] for x in unique_names}
     for row in rows:
         name = row.findAll('td')[0].text
