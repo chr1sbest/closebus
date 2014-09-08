@@ -30,25 +30,36 @@ As most of the data is realtime travel information, there is little reason to wr
 
 I chose to deploy to **Heroku** due to the ease of deployment and cost (free!)
 
-Backend
-====
-
-The backend consists of four main components.
-
-> 1) Finding nearby bus stops.
-
-> 2) Finding the corresponding **stop_id** for each stop.
-
-> 2) Using the stop_id to query travel API's for realtime travel estimates.
-
-> 3) Caching results.
+Frontend
+=====
 
 Nearby Stops
 ----
 
-The **/stop_id** endpoint mainly serves as an adapter to the Google Places API.
+The frontend queries Goole Places API to pick up **place_id**s for nearby locations, queries Google Places for more individual details, and then passed those details as url parameters to */stop_id/place_id* for each location. This API endpoint uses the details to attempt multiple strategies to retrieve stop_ids.
 
-The frontend picks up **place_id**s for nearby locations, queries Google Places for more details, and then passed those details as url parameters to */stop_id/place_id* for each location. This API endpoint uses the details to attempt multiple strategies to retrieve stop_ids.
+All of the Google API queries are done client-side to minimize server load and to keep from getting rate limited.
+
+Views
+----
+
+The frontend consists of a **MapView** and **StopViews** that contain **RouteViews**. The interface is inspired by Uber and consists of a movable marker and clickable bus stops.
+
+The MapView does most of the heavy lifting by building out the initial page, geolocating, finding nearby bus stops via Google Places API, and then querying Google Places for more information. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then fetches from the **/stop_id** endpoint to attempt to retrieve stop_id details. If successful, a bus stop marker is added onto the map. If unsuccessful, no bus marker is added to the map.
+
+When a bus stop marker is clicked, a new StopView is instantiated. This StopView instantiates a child RouteView for each stop_id it holds. The **RouteModel** attached to the RouteView view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
+
+
+Backend
+====
+
+The backend consists of three main components.
+
+> 1) Finding the corresponding **stop_id** for each bus stop.
+
+> 2) Using the stop_id to query travel API's for realtime travel estimates.
+
+> 3) Caching results.
 
 
 Finding the corresponding stop_id for each stop.
@@ -78,15 +89,6 @@ NextBus will rate limit me at 2mb/20s. With each request around 1kb, making 100 
 The mapping of place_id's to stop_id's is cached so that the application doesn't need to go through all the hassle every time a user is within a known stop's vicinity.
 
 The cache is written as a decorator that I can easily throw on top of class methods (yay Python!)
-
-Frontend
-=====
-
-The frontend consists of a **MapView** and **StopViews** that contain **RouteViews**. The interface is inspired by Uber and consists of a movable marker and clickable bus stops.
-
-The MapView does most of the heavy lifting by building out the initial page, geolocating, finding nearby bus stops via Google Places API, and then querying Google Places for more information. When the MapView finds a bus stop, it instantiates a new **StopModel** and adds it to it's **StopCollection.** The StopModel then fetches from the **/stop_id** endpoint to attempt to retrieve stop_id details. If successful, a bus stop marker is added onto the map. If unsuccessful, no bus marker is added to the map.
-
-When a bus stop marker is clicked, a new StopView is instantiated. This StopView instantiates a child RouteView for each stop_id it holds. The **RouteModel** attached to the RouteView view fetches from the **/departures** endpoint and then parses and attaches a rendered template to the infowindow above the marker.
 
 Improvements
 ====
