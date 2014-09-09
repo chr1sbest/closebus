@@ -16,6 +16,6 @@ def get_stop_id(details):
     ]
     for strategy in chain_of_command:
         details = strategy(details)
-        if details['stop_ids'] != "Unavailable":
+        if details.get('stop_ids', "Unavailable") != "Unavailable":
             return details
     return {'message': "Failed to find stop_id's.", 'details': details}

@@ -1,6 +1,6 @@
 import os
 
-API_KEY = os.environ.get('API_KEY', None)
+CTA_KEY = os.environ.get('CTA_KEY', None)
 
 try:
     from local_settings import *

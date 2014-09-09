@@ -18,7 +18,9 @@ website_map = {
     'http://www.foothilltransit.org/': \
             ['foothill'],
     'http://www.mta.info/': \
-            ['bronx', 'brooklyn', 'staten-island']
+            ['bronx', 'brooklyn', 'staten-island'],
+    'http://transitchicago.com/': \
+            ['chicago-cta']
 }
 
 def strategy_location_mapper(details):

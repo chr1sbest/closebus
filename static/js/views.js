@@ -130,7 +130,9 @@ var MapView = Backbone.View.extend({
       success: function(response) {
         // Only add markers for actransit, and berkeley shuttles. sf-muni next!
         var agencies = ['actransit', 'berkeley', 'sf-muni', 'foothill', 'lametro',
-                        'lametro-rail', 'bronx', 'brooklyn', 'staten-island'];
+                        'lametro-rail', 'bronx', 'brooklyn', 'staten-island',
+                        'chicago-cta'
+        ];
         var icon_urls = {
           "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
           "http://www.actransit.org/": 'images/ac.png',
