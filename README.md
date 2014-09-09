@@ -15,7 +15,7 @@ I chose to build out CloseBus for two main reasons:
 Current Status
 ---
 - The application is deployed and capable of holding real-time data for up to 6,000 bus stops at a time.
-- There is near complete coverage in SF & East Bay, but the coverage in New York City and Los Angeles is mostly restricted to the densely populated areas (Downtown LA, Bronx, Brooklyn, Staten Island.)
+- There is near complete coverage in SF & East Bay, but the coverage in New York City, Los Angeles, and Chicago is mostly restricted to the densely populated areas (Downtown LA, Downtown Chicago, Bronx, Brooklyn, Staten Island.)
 - The application is functional on mobile devices, but it has been optimized for non-mobile usage.
 
 Technical Stack Overview
