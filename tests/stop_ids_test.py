@@ -8,17 +8,14 @@ from stop_ids import bus_stops, stop_id_strategies
 class StopIDTest(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-        url = """/api/v1/stop_id/ChIJ0brW5oJ-hYARPVmHstG33dg?url=https%3A\
-            %2F%2Fmaps.google.com%2Fmaps%2Fplace%3Fcid%3D15626848393316\
-            751677&name=Haste+St%3AShattuck+Av&website=http%3A%2F%2Fwww\
-            .actransit.org%2F&place_id=ChIJ0brW5oJ-hYARPVmHstG33dg"""
+        url = "/api/v1/stop_id/ChIJ0brW5oJ-hYARPVmHstG33dg?url=https%3A%2F%2Fmaps.google.com%2Fmaps%2Fplace%3Fcid%3D15626848393316751677&name=Haste+St%3AShattuck+Av&website=http%3A%2F%2Fwww.actransit.org%2F&place_id=ChIJ0brW5oJ-hYARPVmHstG33dg"
         response = self.app.get(url).data
-        self.good_details = json.loads(response)['details']
+        self.good_details = json.loads(response)
         self.good_details['stop_ids'] = "Unavailable"
         self.good_details['agency'] = ['actransit']
         
         # Set up failure.
-        self.bad_details = json.loads(response)['details']
+        self.bad_details = json.loads(response)
         self.bad_details['stop_ids'] = "Unavailable"
         self.bad_details['agency'] = ['lametro']
 

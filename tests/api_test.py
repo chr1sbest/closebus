@@ -26,13 +26,6 @@ class BaseApiTest(unittest.TestCase):
         self.assertEqual('place_id' in response_data, True)
         self.assertEqual('name' in response_data, True)
 
-    def test_get_stop_id_incomplete_parms(self):
-        url = '/api/v1/stop_id/IYJ-hYARZNrfnrYaUFk'
-        response = self.app.get(url)
-        self.assertEqual(response.status_code, 200)
-        message = json.loads(response.data)['message']
-        self.assertEqual(message, 'Incomplete parameters')
-
     def test_get_stop_id_nothing_found(self):
         url = '/api/v1/stop_id/ChIJoWHkRwtnINKUZOTo?url=https%3A%2F%2Fm\
                 aps.google.com%2Fmaps%2Fplace%3Fcid%3D41954127252182040\
