@@ -103,15 +103,17 @@ var MapView = Backbone.View.extend({
           var placeRequest = {placeId: stop.place_id};
           GAPI.getDetails(placeRequest, function(place, status){
             // Build models for each place returned by search.
-            var NewStopModel = new StopModel({
-              id: stop.place_id,
-              location: place.geometry.location,
-              name: place.name,
-              g_url: place.url,
-              website: place.website
-            })
-            self.buildStop(NewStopModel)
-            self.StopCollection.add(NewStopModel);
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+              var NewStopModel = new StopModel({
+                id: stop.place_id,
+                location: place.geometry.location,
+                name: place.name,
+                g_url: place.url,
+                website: place.website
+              })
+              self.buildStop(NewStopModel)
+              self.StopCollection.add(NewStopModel);
+            }
           });
         });
       }

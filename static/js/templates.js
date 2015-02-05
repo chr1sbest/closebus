@@ -44,7 +44,9 @@ templates.welcome = " \
 
 //Template for website
 templates.website = "\
-<a target='_blank' href='<%= website %>' >Route Info</a>\
+  <div style-='overflow: scroll'>\
+    <a target='_blank' href='<%= website %>' >Route Info</a>\
+  </div>\
 ";
 
 //Template for navbar

@@ -75,6 +75,7 @@ ul {
 .gm-style-iw{
     width: 300px;
     max-height: 300px;
+    overflow: scroll;
 }
 
 .pac-container {
