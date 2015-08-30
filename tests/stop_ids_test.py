@@ -2,8 +2,9 @@ import os
 import json
 import unittest
 from requests import get
-from app import app
-from stop_ids import bus_stops, stop_id_strategies 
+from closebus.app import app
+from closebus.stop_ids import bus_stops, stop_id_strategies
+from nose.plugins.attrib import attr
 
 class StopIDTest(unittest.TestCase):
     def setUp(self):
@@ -37,19 +38,10 @@ class StopIDTest(unittest.TestCase):
         details['stop_ids'] = "Unavailable"
         updated = stop_id_strategies.strategy_location_mapper(details)
         self.assertEqual(updated['stop_ids'], "Unavailable")
-        
-    def test_crawler_pass(self):
-        details = self.good_details
-        url = 'https://maps.google.com/maps/place?cid=15626848393316751677'
-        details['url'] = url
-        updated = stop_id_strategies.strategy_crawler(details)
-        print updated['url']
-        self.assertEqual(updated['stop_ids'], ['58005'])
 
     def test_normalizer(self):
         address = 'Dwight PK/w 156 St'
         normalized = stop_id_strategies.normalize_address(address)
-        print address, normalized
         self.assertEqual(normalized, 'Dwight Pk & W 156th St')
         
     def test_ordinal(self):

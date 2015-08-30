@@ -2,8 +2,8 @@ import os
 import json
 import unittest
 from requests import get
-from app import app
-from departures.travel_apis import NextBus, ChicagoCTA
+from closebus.app import app
+from closebus.departures.travel_apis import NextBus, ChicagoCTA
 
 class APINextBusTest(unittest.TestCase):
     def setUp(self):

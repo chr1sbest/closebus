@@ -2,7 +2,7 @@ import os
 import json
 import unittest
 from requests import get
-from app import app
+from closebus.app import app
 
 class BaseApiTest(unittest.TestCase):
     def setUp(self):

@@ -1,10 +1,17 @@
 import redis
 import os
+import mockredis
 from json import loads
 from functools import wraps
 
-url = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379')
-redis_cache = redis.from_url(url + ':6379')
+# Attempt to connect to remote Redis instance if available. Otherwise
+# connect to a local Redis instance if available, or mock for tests.
+try:
+    url = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379')
+    redis_cache = redis.from_url(url + ':6379')
+    redis_cache.ping()
+except redis.ConnectionError:
+    redis_cache = mockredis.mock_redis_client()
 
 def cache_decorator(expire=True, ttl_seconds=300):
     """
