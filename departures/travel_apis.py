@@ -2,7 +2,8 @@ import xmltodict
 from requests import get as rget
 from datetime import datetime
 from pytz import timezone
-from closebus.settings import CTA_KEY
+
+CTA_KEY = 'S5Enmb3DK5stxfUGCcNThTvR8'
 
 class AbstractAgency(object):
     """

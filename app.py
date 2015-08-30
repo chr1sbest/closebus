@@ -2,9 +2,9 @@ from json import dumps
 from flask import Flask
 from flask.ext.restful import Api, Resource, reqparse
 from redis_cache import cache_decorator
-from closebus.departures.travel_apis import agency_map
-from closebus.stop_ids.stop_id_strategies import website_map
-from closebus.stop_ids.bus_stops import get_stop_id
+from departures.travel_apis import agency_map
+from stop_ids.stop_id_strategies import website_map
+from stop_ids.bus_stops import get_stop_id
 
 app = Flask(__name__, static_url_path='')
 api = Api(app)
