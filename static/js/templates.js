@@ -33,7 +33,7 @@ templates.welcome = " \
              - East Bay  <br>\
              - Metropolitan Los Angeles  <br>\
              - Metropolitan New York City  <br>\
-             - Metropolitan Chicago <br>\
+             - Metropolitan Chicago (No longer fully supported!)<br>\
         </li>\
       </ul>\
     </div>\

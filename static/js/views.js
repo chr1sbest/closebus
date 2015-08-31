@@ -136,15 +136,15 @@ var MapView = Backbone.View.extend({
                         'chicago-cta'
         ];
         var icon_urls = {
-          "http://pt.berkeley.edu/around/transit/shuttles": 'images/berkeley.png',
-          "http://www.actransit.org/": 'images/ac.png',
-          "http://www.sfmta.com/": 'images/muni.png',
-          "http://www.goldengate.org/": 'images/gold.png'
+          "berkeley": 'images/berkeley.png',
+          "actransit": 'images/ac.png',
+          "sf-muni": 'images/muni.png',
+          "chicago-cta": 'images/gold.png'
         }
         if (agencies.indexOf(response.attributes.agency) >= 0 &&
         response.attributes.stop_ids !== 'Unavailable'){
           // Build stop if agency is supported and has stop_ids.
-          var busColor = response.attributes.website;
+          var busColor = response.attributes.agency;
           var busIcon = {
             url: icon_urls[busColor] || 'images/bus.png',
             scaledSize: new google.maps.Size(24, 32),

@@ -20,7 +20,12 @@ website_map = {
     'http://www.mta.info/': \
             ['bronx', 'brooklyn', 'staten-island'],
     'http://transitchicago.com/': \
-            ['chicago-cta']
+            ['chicago-cta'],
+    # If no website is passed in, we will iterate through all supported
+    # transit agencies in this order. Google maps stopped including transit
+    # agency website on json response.
+    None: ['actransit', 'sf-muni', 'lametro', 'lametro-rail', 'foothill',
+           'bronx', 'brooklyn', 'staten-island', 'chicago-cta']
 }
 
 def strategy_location_mapper(details):

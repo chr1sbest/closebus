@@ -75,10 +75,18 @@ ul {
 .gm-style-iw{
     width: 300px;
     max-height: 300px;
-    overflow: scroll;
+}
+
+/* Google Maps v3 update caused scrollbar issue with infowindow. This is a
+ * little hacky, but the following two css statements fix the scrollbar. */
+.gm-style .gm-style-iw{
+    overflow:scroll;
+}
+
+.gm-style-iw div:first-child{
+    overflow:hidden !important;
 }
 
 .pac-container {
     font-family: Roboto;
 }
-
